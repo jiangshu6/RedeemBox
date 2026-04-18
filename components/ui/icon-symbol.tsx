@@ -1,29 +1,94 @@
-// Fallback for using MaterialIcons on Android and web.
-
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { SymbolWeight, SymbolViewProps } from 'expo-symbols';
-import { ComponentProps } from 'react';
-import { OpaqueColorValue, type StyleProp, type TextStyle } from 'react-native';
-
-type IconMapping = Record<SymbolViewProps['name'], ComponentProps<typeof MaterialIcons>['name']>;
-type IconSymbolName = keyof typeof MAPPING;
+import { type StyleProp, type ViewStyle } from 'react-native';
+import { FontAwesome6 } from '@expo/vector-icons';
 
 /**
- * Add your SF Symbols to Material Icons mappings here.
- * - see Material Icons in the [Icons Directory](https://icons.expo.fyi).
- * - see SF Symbols in the [SF Symbols](https://developer.apple.com/sf-symbols/) app.
+ * 图标名称类型
+ * 映射到 FontAwesome6 图标
  */
-const MAPPING = {
-  'house.fill': 'home',
-  'paperplane.fill': 'send',
-  'chevron.left.forwardslash.chevron.right': 'code',
-  'chevron.right': 'chevron-right',
-} as IconMapping;
+export type IconName =
+  // Tab 图标
+  | 'ticket'
+  | 'folder'
+  | 'gear'
+  // 导航图标
+  | 'chevron-left'
+  | 'chevron-right'
+  | 'chevron-up'
+  | 'chevron-down'
+  // 操作图标
+  | 'plus'
+  | 'minus'
+  | 'xmark'
+  | 'check'
+  | 'pen'
+  | 'trash'
+  | 'share'
+  | 'copy'
+  // 状态图标
+  | 'circle-check'
+  | 'circle-xmark'
+  | 'triangle-exclamation'
+  | 'circle-info'
+  // 功能图标
+  | 'magnifying-glass'
+  | 'bell'
+  | 'bell-slash'
+  | 'clock'
+  | 'calendar'
+  | 'sun'
+  | 'moon'
+  | 'rotate-left'
+  | 'house'
+  | 'paper-plane'
+  | 'list'
+  | 'filter';
 
 /**
- * An icon component that uses native SF Symbols on iOS, and Material Icons on Android and web.
- * This ensures a consistent look across platforms, and optimal resource usage.
- * Icon `name`s are based on SF Symbols and require manual mapping to Material Icons.
+ * 图标名称映射
+ * 将内部名称映射到 FontAwesome6 图标名称
+ */
+const iconNameMap: Record<IconName, string> = {
+  // Tab 图标
+  'ticket': 'ticket',
+  'folder': 'folder',
+  'gear': 'gear',
+  // 导航图标
+  'chevron-left': 'chevron-left',
+  'chevron-right': 'chevron-right',
+  'chevron-up': 'chevron-up',
+  'chevron-down': 'chevron-down',
+  // 操作图标
+  'plus': 'plus',
+  'minus': 'minus',
+  'xmark': 'xmark',
+  'check': 'check',
+  'pen': 'pen',
+  'trash': 'trash',
+  'share': 'share-from-square',
+  'copy': 'copy',
+  // 状态图标
+  'circle-check': 'circle-check',
+  'circle-xmark': 'circle-xmark',
+  'triangle-exclamation': 'triangle-exclamation',
+  'circle-info': 'circle-info',
+  // 功能图标
+  'magnifying-glass': 'magnifying-glass',
+  'bell': 'bell',
+  'bell-slash': 'bell-slash',
+  'clock': 'clock',
+  'calendar': 'calendar-days',
+  'sun': 'sun',
+  'moon': 'moon',
+  'rotate-left': 'rotate-left',
+  'house': 'house',
+  'paper-plane': 'paper-plane',
+  'list': 'list',
+  'filter': 'filter',
+};
+
+/**
+ * 图标组件
+ * 使用 @expo/vector-icons 的 FontAwesome6 图标
  */
 export function IconSymbol({
   name,
@@ -31,11 +96,18 @@ export function IconSymbol({
   color,
   style,
 }: {
-  name: IconSymbolName;
+  name: IconName;
   size?: number;
-  color: string | OpaqueColorValue;
-  style?: StyleProp<TextStyle>;
-  weight?: SymbolWeight;
+  color: string;
+  style?: StyleProp<ViewStyle>;
 }) {
-  return <MaterialIcons color={color} size={size} name={MAPPING[name]} style={style} />;
+  const faName = iconNameMap[name] || name;
+  return (
+    <FontAwesome6
+      name={faName}
+      size={size}
+      color={color}
+      style={style}
+    />
+  );
 }
