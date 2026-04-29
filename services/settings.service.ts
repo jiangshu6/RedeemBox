@@ -1,4 +1,4 @@
-import { AppSettings, ThemeMode } from '@/types';
+import { AppSettings, ThemeMode, NotifyTime } from '@/types';
 import { SettingsRepository } from '@/repositories/settings.repository';
 import { validateNotifyDays } from '@/utils/validation';
 import { NotificationConstants } from '@/constants';
@@ -103,6 +103,42 @@ export const SettingsService = {
       return { success: true };
     } catch (error) {
       return { success: false, error: '设置主题模式失败' };
+    }
+  },
+
+  /**
+   * 获取通知时间
+   */
+  async getNotifyTime(): Promise<ServiceResult<NotifyTime>> {
+    try {
+      const time = await SettingsRepository.getNotifyTime();
+      return { success: true, data: time };
+    } catch (error) {
+      return { success: false, error: '获取通知时间失败' };
+    }
+  },
+
+  /**
+   * 设置通知时间
+   */
+  async setNotifyTime(time: NotifyTime): Promise<ServiceResult> {
+    // 验证时间格式
+    if (
+      typeof time.hour !== 'number' ||
+      typeof time.minute !== 'number' ||
+      time.hour < 0 ||
+      time.hour > 23 ||
+      time.minute < 0 ||
+      time.minute > 59
+    ) {
+      return { success: false, error: '时间格式无效' };
+    }
+
+    try {
+      await SettingsRepository.setNotifyTime(time);
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: '设置通知时间失败' };
     }
   },
 

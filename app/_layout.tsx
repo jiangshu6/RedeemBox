@@ -7,6 +7,7 @@ import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useNotification } from '@/hooks/useNotification';
+import { useSettingsStore } from '@/store/settings.store';
 import { initDatabase } from '@/services/database.service';
 
 export const unstable_settings = {
@@ -22,6 +23,8 @@ export default function RootLayout() {
   const [dbReady, setDbReady] = useState(false);
   const [dbError, setDbError] = useState<string | null>(null);
   
+  const loadSettings = useSettingsStore((state) => state.loadSettings);
+  
   useNotification();
 
   // 初始化数据库
@@ -30,6 +33,8 @@ export default function RootLayout() {
       try {
         await initDatabase();
         console.log('数据库初始化成功');
+        // 加载设置（包括主题模式）
+        await loadSettings();
         setDbReady(true);
       } catch (error) {
         console.error('数据库初始化失败:', error);
@@ -37,7 +42,7 @@ export default function RootLayout() {
       }
     };
     init();
-  }, []);
+  }, [loadSettings]);
 
   // 数据库未准备好时显示加载状态
   if (!dbReady) {

@@ -72,7 +72,7 @@ export default function NewCodeScreen() {
         styles.footer,
         {
           paddingBottom: insets.bottom + 16,
-          backgroundColor: colorScheme === 'dark' ? '#000' : '#fff',
+          backgroundColor: colors.background,
         },
       ]}>
         <Button

@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useSettingsStore } from '@/store/settings.store';
 import { useUIStore } from '@/store/ui.store';
-import { ThemeMode } from '@/types';
+import { ThemeMode, NotifyTime } from '@/types';
 import { NotificationConstants } from '@/constants';
 
 /**
@@ -12,12 +12,14 @@ export function useSettings() {
     notifyEnabled,
     defaultNotifyDays,
     themeMode,
+    notifyTime,
     loading,
     error,
     loadSettings,
     setNotifyEnabled,
     setDefaultNotifyDays,
     setThemeMode,
+    setNotifyTime,
     resetToDefaults,
     clearError,
   } = useSettingsStore();
@@ -77,6 +79,20 @@ export function useSettings() {
   }, [setThemeMode, showToast]);
 
   /**
+   * 更新通知时间
+   */
+  const updateNotifyTime = useCallback(async (time: NotifyTime) => {
+    const success = await setNotifyTime(time);
+    if (success) {
+      const timeStr = `${time.hour.toString().padStart(2, '0')}:${time.minute.toString().padStart(2, '0')}`;
+      showToast(`通知时间已设置为 ${timeStr}`, 'success');
+    } else {
+      showToast('设置失败', 'error');
+    }
+    return success;
+  }, [setNotifyTime, showToast]);
+
+  /**
    * 重置所有设置
    */
   const handleResetToDefaults = useCallback(async () => {
@@ -109,16 +125,19 @@ export function useSettings() {
     notifyEnabled,
     defaultNotifyDays,
     themeMode,
+    notifyTime,
     loading,
     error,
     loadSettings,
     toggleNotifyEnabled,
     updateDefaultNotifyDays,
     updateThemeMode,
+    updateNotifyTime,
     resetToDefaults: handleResetToDefaults,
     clearError,
     // 常量
     minNotifyDays: NotificationConstants.MIN_NOTIFY_DAYS,
     maxNotifyDays: NotificationConstants.MAX_NOTIFY_DAYS,
+    presetNotifyTimes: NotificationConstants.PRESET_NOTIFY_TIMES,
   };
 }

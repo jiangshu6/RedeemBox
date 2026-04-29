@@ -5,7 +5,7 @@ import { Stack, router } from 'expo-router';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 import { useSettings } from '@/hooks/useSettings';
-import { NotifyDaysSetting, ThemeModeSetting } from '@/components/settings';
+import { NotifyDaysSetting, NotifyTimeSetting, ThemeModeSetting } from '@/components/settings';
 import { ConfirmDialog, Toast } from '@/components/common';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -29,10 +29,12 @@ export default function SettingsScreen() {
   const {
     notifyEnabled,
     defaultNotifyDays,
+    notifyTime,
     themeMode,
     loadSettings,
     toggleNotifyEnabled,
     updateDefaultNotifyDays,
+    updateNotifyTime,
     updateThemeMode,
     resetToDefaults,
   } = useSettings();
@@ -100,6 +102,15 @@ export default function SettingsScreen() {
             <NotifyDaysSetting
               value={defaultNotifyDays}
               onChange={updateDefaultNotifyDays}
+              disabled={!notifyEnabled}
+            />
+          </View>
+
+          {/* 通知时间设置 */}
+          <View style={styles.settingItem}>
+            <NotifyTimeSetting
+              value={notifyTime}
+              onChange={updateNotifyTime}
               disabled={!notifyEnabled}
             />
           </View>

@@ -12,7 +12,8 @@ import { EmptyState, ConfirmDialog, Toast, Loading } from '@/components/common';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { RedemptionCode } from '@/types';
+import { RedemptionCode, RedemptionCodeStatus } from '@/types';
+import { StatusColorMap } from '@/constants/status';
 
 /**
  * 兑换码列表首页
@@ -111,6 +112,18 @@ export default function HomeScreen() {
     }
   }, [setFilter]);
 
+  // 选择状态筛选
+  const handleSelectStatus = useCallback((status: RedemptionCodeStatus | null) => {
+    setFilter({ status });
+  }, [setFilter]);
+
+  // 状态筛选选项
+  const statusOptions: { value: RedemptionCodeStatus | null; label: string; color: string }[] = useMemo(() => [
+    { value: RedemptionCodeStatus.ACTIVE, label: '有效', color: StatusColorMap[RedemptionCodeStatus.ACTIVE] },
+    { value: RedemptionCodeStatus.USED, label: '已使用', color: StatusColorMap[RedemptionCodeStatus.USED] },
+    { value: RedemptionCodeStatus.EXPIRED, label: '已过期', color: StatusColorMap[RedemptionCodeStatus.EXPIRED] },
+  ], []);
+
   // 悬浮按钮阴影颜色
   const fabShadowColor = colorScheme === 'dark' 
     ? 'rgba(0, 122, 255, 0.6)' 
@@ -207,6 +220,69 @@ export default function HomeScreen() {
           </ScrollView>
         </View>
       )}
+
+      {/* 状态筛选标签 */}
+      <View style={styles.statusFilterContainer}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.statusFilterContent}
+        >
+          {/* 全部状态 */}
+          <TouchableOpacity
+            style={[
+              styles.statusTag,
+              filter.status === null && styles.statusTagActive,
+              {
+                backgroundColor: filter.status === null
+                  ? '#0a7ea4'
+                  : colorScheme === 'dark'
+                    ? 'rgba(255,255,255,0.05)'
+                    : 'rgba(0,0,0,0.03)',
+              },
+            ]}
+            onPress={() => handleSelectStatus(null)}
+          >
+            <ThemedText
+              style={[
+                styles.statusTagText,
+                filter.status === null && styles.statusTagTextActive,
+              ]}
+            >
+              全部
+            </ThemedText>
+          </TouchableOpacity>
+
+          {/* 各状态选项 */}
+          {statusOptions.map((option) => (
+            <TouchableOpacity
+              key={option.value}
+              style={[
+                styles.statusTag,
+                filter.status === option.value && styles.statusTagActive,
+                {
+                  backgroundColor: filter.status === option.value
+                    ? option.color
+                    : colorScheme === 'dark'
+                      ? 'rgba(255,255,255,0.05)'
+                      : 'rgba(0,0,0,0.03)',
+                },
+              ]}
+              onPress={() => handleSelectStatus(option.value)}
+            >
+              <View style={[styles.statusDot, { backgroundColor: option.color }]} />
+              <ThemedText
+                style={[
+                  styles.statusTagText,
+                  filter.status === option.value && styles.statusTagTextActive,
+                ]}
+              >
+                {option.label}
+              </ThemedText>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
 
       {/* 加载中状态 */}
       {!initialized && loading && <Loading visible={true} text="加载中..." />}
@@ -339,6 +415,41 @@ const styles = StyleSheet.create({
   categoryCountActive: {
     color: '#fff',
     opacity: 0.9,
+  },
+  statusFilterContainer: {
+    paddingBottom: 8,
+  },
+  statusFilterContent: {
+    paddingHorizontal: 16,
+    gap: 8,
+    flexDirection: 'row',
+  },
+  statusTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 20,
+    gap: 6,
+  },
+  statusTagActive: {
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+  },
+  statusTagText: {
+    fontSize: 13,
+    fontWeight: '400',
+  },
+  statusTagTextActive: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   listContent: {
     padding: 16,

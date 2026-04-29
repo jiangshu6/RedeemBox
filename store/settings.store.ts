@@ -1,6 +1,7 @@
 import { create } from 'zustand';
-import { AppSettings, ThemeMode } from '@/types';
+import { AppSettings, ThemeMode, NotifyTime } from '@/types';
 import { SettingsService } from '@/services/settings.service';
+import { NotificationConstants } from '@/constants';
 
 /**
  * 设置状态接口
@@ -11,6 +12,7 @@ interface SettingsState {
   defaultNotifyDays: number;
   themeMode: ThemeMode;
   lastCheckTime: string | null;
+  notifyTime: NotifyTime;
   loading: boolean;
   error: string | null;
 
@@ -19,6 +21,7 @@ interface SettingsState {
   setNotifyEnabled: (enabled: boolean) => Promise<boolean>;
   setDefaultNotifyDays: (days: number) => Promise<boolean>;
   setThemeMode: (mode: ThemeMode) => Promise<boolean>;
+  setNotifyTime: (time: NotifyTime) => Promise<boolean>;
   resetToDefaults: () => Promise<boolean>;
   clearError: () => void;
 }
@@ -32,6 +35,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   defaultNotifyDays: 3,
   themeMode: 'system',
   lastCheckTime: null,
+  notifyTime: NotificationConstants.DEFAULT_NOTIFY_TIME,
   loading: false,
   error: null,
 
@@ -46,6 +50,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
         defaultNotifyDays: settings.defaultNotifyDays,
         themeMode: settings.themeMode,
         lastCheckTime: settings.lastCheckTime,
+        notifyTime: settings.notifyTime,
         loading: false,
       });
     } else {
@@ -86,6 +91,18 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       return true;
     }
     set({ error: result.error ?? '设置主题模式失败', loading: false });
+    return false;
+  },
+
+  // 设置通知时间
+  setNotifyTime: async (time: NotifyTime) => {
+    set({ loading: true, error: null });
+    const result = await SettingsService.setNotifyTime(time);
+    if (result.success) {
+      set({ notifyTime: time, loading: false });
+      return true;
+    }
+    set({ error: result.error ?? '设置通知时间失败', loading: false });
     return false;
   },
 

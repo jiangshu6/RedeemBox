@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AppSettings, ThemeMode, SettingsKeys } from '@/types';
+import { AppSettings, ThemeMode, SettingsKeys, NotifyTime } from '@/types';
 import { NotificationConstants } from '@/constants';
 
 /**
@@ -10,6 +10,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   defaultNotifyDays: NotificationConstants.DEFAULT_NOTIFY_DAYS,
   themeMode: 'system',
   lastCheckTime: null,
+  notifyTime: NotificationConstants.DEFAULT_NOTIFY_TIME,
 };
 
 /**
@@ -20,11 +21,12 @@ export const SettingsRepository = {
    * 获取所有设置
    */
   async getSettings(): Promise<AppSettings> {
-    const [notifyEnabled, defaultNotifyDays, themeMode, lastCheckTime] = await Promise.all([
+    const [notifyEnabled, defaultNotifyDays, themeMode, lastCheckTime, notifyTime] = await Promise.all([
       this.getNotifyEnabled(),
       this.getDefaultNotifyDays(),
       this.getThemeMode(),
       this.getLastCheckTime(),
+      this.getNotifyTime(),
     ]);
 
     return {
@@ -32,6 +34,7 @@ export const SettingsRepository = {
       defaultNotifyDays,
       themeMode,
       lastCheckTime,
+      notifyTime,
     };
   },
 
@@ -102,6 +105,37 @@ export const SettingsRepository = {
   },
 
   /**
+   * 获取通知时间
+   */
+  async getNotifyTime(): Promise<NotifyTime> {
+    const value = await AsyncStorage.getItem(SettingsKeys.NOTIFY_TIME);
+    if (value === null) {
+      return DEFAULT_SETTINGS.notifyTime;
+    }
+    try {
+      const parsed = JSON.parse(value);
+      if (
+        typeof parsed.hour === 'number' &&
+        typeof parsed.minute === 'number' &&
+        parsed.hour >= 0 && parsed.hour <= 23 &&
+        parsed.minute >= 0 && parsed.minute <= 59
+      ) {
+        return { hour: parsed.hour, minute: parsed.minute };
+      }
+    } catch {
+      // 解析失败，返回默认值
+    }
+    return DEFAULT_SETTINGS.notifyTime;
+  },
+
+  /**
+   * 设置通知时间
+   */
+  async setNotifyTime(time: NotifyTime): Promise<void> {
+    await AsyncStorage.setItem(SettingsKeys.NOTIFY_TIME, JSON.stringify(time));
+  },
+
+  /**
    * 重置所有设置为默认值
    */
   async resetToDefaults(): Promise<void> {
@@ -109,6 +143,7 @@ export const SettingsRepository = {
       this.setNotifyEnabled(DEFAULT_SETTINGS.notifyEnabled),
       this.setDefaultNotifyDays(DEFAULT_SETTINGS.defaultNotifyDays),
       this.setThemeMode(DEFAULT_SETTINGS.themeMode),
+      this.setNotifyTime(DEFAULT_SETTINGS.notifyTime),
       AsyncStorage.removeItem(SettingsKeys.LAST_CHECK_TIME),
     ]);
   },

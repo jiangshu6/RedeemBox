@@ -209,28 +209,15 @@ export const useCodeStore = create<CodeState>((set, get) => ({
       );
     }
 
-    // 排序
+    // 排序：先按状态排序（有效 > 已使用 > 已过期），再按创建时间排序（最新优先）
     filtered.sort((a, b) => {
-      let valueA: number;
-      let valueB: number;
-
-      switch (sort.field) {
-        case 'expireDate':
-          valueA = a.expireDate ?? Number.MAX_SAFE_INTEGER;
-          valueB = b.expireDate ?? Number.MAX_SAFE_INTEGER;
-          break;
-        case 'updatedAt':
-          valueA = a.updatedAt;
-          valueB = b.updatedAt;
-          break;
-        case 'createdAt':
-        default:
-          valueA = a.createdAt;
-          valueB = b.createdAt;
-          break;
+      // 首先按状态排序
+      if (a.status !== b.status) {
+        return a.status - b.status; // ACTIVE(0) < USED(1) < EXPIRED(2)
       }
-
-      return sort.order === 'asc' ? valueA - valueB : valueB - valueA;
+      
+      // 状态相同时，按创建时间排序（最新优先）
+      return b.createdAt - a.createdAt;
     });
 
     set({ filteredCodes: filtered });
