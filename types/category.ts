@@ -3,6 +3,7 @@
  */
 export interface Category {
   id: number;
+  uuid: string;
   name: string;
   color: string;
   sortOrder: number;
@@ -38,6 +39,7 @@ export interface UpdateCategoryDTO {
  */
 export interface CategoryRow {
   id: number;
+  uuid: string | null;
   name: string;
   color: string;
   sort_order: number;

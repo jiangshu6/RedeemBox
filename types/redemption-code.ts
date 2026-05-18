@@ -15,6 +15,7 @@ export enum RedemptionCodeStatus {
  */
 export interface RedemptionCode {
   id: number;
+  uuid: string;
   code: string;
   categoryId: number | null;
   description: string | null;
@@ -69,6 +70,7 @@ export interface SortOption {
  */
 export interface RedemptionCodeRow {
   id: number;
+  uuid: string | null;
   code: string;
   category_id: number | null;
   description: string | null;

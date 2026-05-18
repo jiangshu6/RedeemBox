@@ -5,8 +5,9 @@ import { Stack, router } from 'expo-router';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 import { useSettings } from '@/hooks/useSettings';
+import { useBackup } from '@/hooks/useBackup';
 import { NotifyDaysSetting, NotifyTimeSetting, ThemeModeSetting } from '@/components/settings';
-import { ConfirmDialog, Toast } from '@/components/common';
+import { ConfirmDialog, Toast, Loading } from '@/components/common';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -39,7 +40,9 @@ export default function SettingsScreen() {
     resetToDefaults,
   } = useSettings();
 
-  const { confirmDialog, toast, hideToast } = useUIStore();
+  const { handleExport, handleImport } = useBackup();
+
+  const { confirmDialog, toast, hideToast, isLoading, loadingText } = useUIStore();
 
   // 初始化加载设置
   useEffect(() => {
@@ -132,9 +135,37 @@ export default function SettingsScreen() {
         <View style={[styles.section, { backgroundColor: sectionBgColor, borderColor: colors.border }]}>
           <ThemedText style={styles.sectionTitle}>数据管理</ThemedText>
           
-          {/* 通知历史 */}
+          {/* 数据备份 */}
           <TouchableOpacity
             style={[styles.settingRow, { borderBottomColor: dividerColor }]}
+            onPress={handleExport}
+          >
+            <View style={styles.settingLeft}>
+              <IconSymbol name="upload" size={22} color={iconColor} />
+              <Text style={[styles.settingLabel, { color: colors.text }]}>
+                数据备份
+              </Text>
+            </View>
+            <IconSymbol name="chevron-right" size={16} color={colors.icon} />
+          </TouchableOpacity>
+
+          {/* 数据导入 */}
+          <TouchableOpacity
+            style={[styles.settingRow, { borderBottomColor: dividerColor }]}
+            onPress={handleImport}
+          >
+            <View style={styles.settingLeft}>
+              <IconSymbol name="download" size={22} color={iconColor} />
+              <Text style={[styles.settingLabel, { color: colors.text }]}>
+                数据导入
+              </Text>
+            </View>
+            <IconSymbol name="chevron-right" size={16} color={colors.icon} />
+          </TouchableOpacity>
+          
+          {/* 通知历史 */}
+          <TouchableOpacity
+            style={styles.settingRow}
             onPress={() => router.push('/notification/history')}
           >
             <View style={styles.settingLeft}>
@@ -197,6 +228,9 @@ export default function SettingsScreen() {
         type={toast.type}
         onHide={hideToast}
       />
+
+      {/* Loading */}
+      <Loading visible={isLoading} text={loadingText ?? undefined} />
     </ThemedView>
   );
 }

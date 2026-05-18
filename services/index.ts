@@ -7,3 +7,4 @@ export * from './category.service';
 export * from './notification.service';
 export * from './settings.service';
 export * from './clipboard.service';
+export * from './backup.service';

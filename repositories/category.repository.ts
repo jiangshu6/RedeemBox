@@ -1,5 +1,5 @@
-import { Category, CategoryWithCount, CreateCategoryDTO, UpdateCategoryDTO, CategoryRow } from '@/types';
-import { getDatabase } from '@/services/database.service';
+import { Category, CategoryWithCount, CreateCategoryDTO, UpdateCategoryDTO, CategoryRow, BackupCategory } from '@/types';
+import { getDatabase, generateUuid } from '@/services/database.service';
 import { DEFAULT_CATEGORY_COLOR } from '@/constants';
 
 /**
@@ -8,6 +8,7 @@ import { DEFAULT_CATEGORY_COLOR } from '@/constants';
 function rowToEntity(row: CategoryRow): Category {
   return {
     id: row.id,
+    uuid: row.uuid ?? '',
     name: row.name,
     color: row.color,
     sortOrder: row.sort_order,
@@ -26,6 +27,7 @@ export const CategoryRepository = {
   async create(data: CreateCategoryDTO): Promise<Category | null> {
     const db = getDatabase();
     const now = Date.now();
+    const uuid = generateUuid();
 
     // 获取当前最大排序值
     const maxSortResult = await db.getFirstAsync<{ max_sort: number | null }>(
@@ -34,9 +36,9 @@ export const CategoryRepository = {
     const sortOrder = (maxSortResult?.max_sort ?? -1) + 1;
 
     const result = await db.runAsync(
-      `INSERT INTO category (name, color, sort_order, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?)`,
-      [data.name, data.color ?? DEFAULT_CATEGORY_COLOR, sortOrder, now, now]
+      `INSERT INTO category (uuid, name, color, sort_order, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [uuid, data.name, data.color ?? DEFAULT_CATEGORY_COLOR, sortOrder, now, now]
     );
     return this.getById(result.lastInsertRowId);
   },
@@ -175,5 +177,49 @@ export const CategoryRepository = {
       'SELECT COUNT(*) as count FROM category'
     );
     return result?.count ?? 0;
+  },
+
+  /**
+   * 根据 UUID 获取类别
+   */
+  async getByUuid(uuid: string): Promise<Category | null> {
+    const db = getDatabase();
+    const row = await db.getFirstAsync<CategoryRow>(
+      'SELECT * FROM category WHERE uuid = ?',
+      [uuid]
+    );
+    return row ? rowToEntity(row) : null;
+  },
+
+  /**
+   * 获取所有 UUID 集合
+   */
+  async getAllUuids(): Promise<Set<string>> {
+    const db = getDatabase();
+    const rows = await db.getAllAsync<{ uuid: string }>(
+      'SELECT uuid FROM category WHERE uuid IS NOT NULL'
+    );
+    return new Set(rows.map((row) => row.uuid));
+  },
+
+  /**
+   * 从备份数据导入类别
+   * @returns 导入的类别 ID，如果已存在则返回 null
+   */
+  async importFromBackup(data: BackupCategory): Promise<Category | null> {
+    const db = getDatabase();
+
+    // 检查 UUID 是否已存在
+    const existing = await this.getByUuid(data.uuid);
+    if (existing) {
+      return null;
+    }
+
+    const result = await db.runAsync(
+      `INSERT INTO category (uuid, name, color, sort_order, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [data.uuid, data.name, data.color, data.sortOrder, data.createdAt, data.updatedAt]
+    );
+    return this.getById(result.lastInsertRowId);
   },
 };

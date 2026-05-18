@@ -1,4 +1,5 @@
 import * as SQLite from 'expo-sqlite';
+import * as Crypto from 'expo-crypto';
 import { PRESET_COLORS } from '@/constants';
 
 /**
@@ -9,7 +10,7 @@ const DATABASE_NAME = 'redemption_codes.db';
 /**
  * 数据库版本
  */
-const DATABASE_VERSION = 1;
+const DATABASE_VERSION = 2;
 
 /**
  * 数据库实例
@@ -64,6 +65,9 @@ async function runMigrations(database: SQLite.SQLiteDatabase): Promise<void> {
 
   if (currentVersion < 1) {
     await runMigrationV1(database);
+  }
+  if (currentVersion < 2) {
+    await runMigrationV2(database);
   }
 
   await database.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
@@ -142,6 +146,60 @@ async function insertInitialData(database: SQLite.SQLiteDatabase): Promise<void>
       [category.name, category.color, category.sortOrder, now, now]
     );
   }
+}
+
+/**
+ * 生成 UUID
+ * @returns UUID 字符串
+ */
+export function generateUuid(): string {
+  return Crypto.randomUUID();
+}
+
+/**
+ * V2 迁移：添加 uuid 字段
+ * @param database 数据库实例
+ */
+async function runMigrationV2(database: SQLite.SQLiteDatabase): Promise<void> {
+  // 1. 为 category 表添加 uuid 字段
+  await database.execAsync(`
+    ALTER TABLE category ADD COLUMN uuid TEXT;
+  `);
+
+  // 2. 为 redemption_code 表添加 uuid 字段
+  await database.execAsync(`
+    ALTER TABLE redemption_code ADD COLUMN uuid TEXT;
+  `);
+
+  // 3. 为现有 category 数据生成 UUID
+  const categories = await database.getAllAsync<{ id: number }>(
+    'SELECT id FROM category WHERE uuid IS NULL'
+  );
+  for (const category of categories) {
+    const uuid = generateUuid();
+    await database.runAsync(
+      'UPDATE category SET uuid = ? WHERE id = ?',
+      [uuid, category.id]
+    );
+  }
+
+  // 4. 为现有 redemption_code 数据生成 UUID
+  const codes = await database.getAllAsync<{ id: number }>(
+    'SELECT id FROM redemption_code WHERE uuid IS NULL'
+  );
+  for (const code of codes) {
+    const uuid = generateUuid();
+    await database.runAsync(
+      'UPDATE redemption_code SET uuid = ? WHERE id = ?',
+      [uuid, code.id]
+    );
+  }
+
+  // 5. 创建 uuid 索引
+  await database.execAsync(`
+    CREATE INDEX IF NOT EXISTS idx_category_uuid ON category(uuid);
+    CREATE INDEX IF NOT EXISTS idx_code_uuid ON redemption_code(uuid);
+  `);
 }
 
 /**

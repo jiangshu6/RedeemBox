@@ -2,13 +2,18 @@ import { useEffect, useState } from 'react';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router/stack';
 import { StatusBar } from 'expo-status-bar';
-import { View, ActivityIndicator, Text, StyleSheet } from 'react-native';
+import { View, ActivityIndicator, Text, StyleSheet, LogBox } from 'react-native';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useNotification } from '@/hooks/useNotification';
 import { useSettingsStore } from '@/store/settings.store';
 import { initDatabase } from '@/services/database.service';
+
+// 忽略 expo-notifications 在 Expo Go 中的远程推送警告
+LogBox.ignoreLogs([
+  'expo-notifications: Android Push notifications',
+]);
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -25,7 +30,7 @@ export default function RootLayout() {
   
   const loadSettings = useSettingsStore((state) => state.loadSettings);
   
-  useNotification();
+  useNotification(dbReady);
 
   // 初始化数据库
   useEffect(() => {

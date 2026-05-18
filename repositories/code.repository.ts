@@ -6,8 +6,9 @@ import {
   SortOption,
   RedemptionCodeStatus,
   RedemptionCodeRow,
+  BackupCode,
 } from '@/types';
-import { getDatabase } from '@/services/database.service';
+import { getDatabase, generateUuid } from '@/services/database.service';
 import { getTodayEndTimestamp, getTodayStartTimestamp } from '@/utils/date';
 
 /**
@@ -16,6 +17,7 @@ import { getTodayEndTimestamp, getTodayStartTimestamp } from '@/utils/date';
 function rowToEntity(row: RedemptionCodeRow): RedemptionCode {
   return {
     id: row.id,
+    uuid: row.uuid ?? '',
     code: row.code,
     categoryId: row.category_id,
     description: row.description,
@@ -39,11 +41,13 @@ export const CodeRepository = {
   async create(data: CreateCodeDTO): Promise<RedemptionCode | null> {
     const db = getDatabase();
     const now = Date.now();
+    const uuid = generateUuid();
     const result = await db.runAsync(
       `INSERT INTO redemption_code
-       (code, category_id, description, expire_date, status, notify_days, is_notify_enabled, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       (uuid, code, category_id, description, expire_date, status, notify_days, is_notify_enabled, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
+        uuid,
         data.code,
         data.categoryId ?? null,
         data.description ?? null,
@@ -279,5 +283,64 @@ export const CodeRepository = {
       ids
     );
     return result.changes;
+  },
+
+  /**
+   * 根据 UUID 获取兑换码
+   */
+  async getByUuid(uuid: string): Promise<RedemptionCode | null> {
+    const db = getDatabase();
+    const row = await db.getFirstAsync<RedemptionCodeRow>(
+      'SELECT * FROM redemption_code WHERE uuid = ?',
+      [uuid]
+    );
+    return row ? rowToEntity(row) : null;
+  },
+
+  /**
+   * 获取所有 UUID 集合
+   */
+  async getAllUuids(): Promise<Set<string>> {
+    const db = getDatabase();
+    const rows = await db.getAllAsync<{ uuid: string }>(
+      'SELECT uuid FROM redemption_code WHERE uuid IS NOT NULL'
+    );
+    return new Set(rows.map((row) => row.uuid));
+  },
+
+  /**
+   * 从备份数据导入兑换码
+   * @param data 备份数据
+   * @param categoryId 类别 ID（已映射）
+   * @returns 导入的兑换码，如果已存在则返回 null
+   */
+  async importFromBackup(data: BackupCode, categoryId: number | null): Promise<RedemptionCode | null> {
+    const db = getDatabase();
+
+    // 检查 UUID 是否已存在
+    const existing = await this.getByUuid(data.uuid);
+    if (existing) {
+      return null;
+    }
+
+    const result = await db.runAsync(
+      `INSERT INTO redemption_code
+       (uuid, code, category_id, description, expire_date, status, notify_days, is_notify_enabled, created_at, updated_at, used_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        data.uuid,
+        data.code,
+        categoryId,
+        data.description,
+        data.expireDate,
+        data.status,
+        data.notifyDays,
+        data.isNotifyEnabled ? 1 : 0,
+        data.createdAt,
+        data.updatedAt,
+        data.usedAt,
+      ]
+    );
+    return this.getById(result.lastInsertRowId);
   },
 };

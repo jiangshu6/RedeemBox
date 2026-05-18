@@ -24,6 +24,8 @@ export type IconName =
   | 'trash'
   | 'share'
   | 'copy'
+  | 'upload'
+  | 'download'
   // 状态图标
   | 'circle-check'
   | 'circle-xmark'
@@ -66,6 +68,8 @@ const iconNameMap: Record<IconName, string> = {
   'trash': 'trash',
   'share': 'share-from-square',
   'copy': 'copy',
+  'upload': 'arrow-up-from-bracket',
+  'download': 'download',
   // 状态图标
   'circle-check': 'circle-check',
   'circle-xmark': 'circle-xmark',

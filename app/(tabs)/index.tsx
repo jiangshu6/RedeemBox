@@ -205,14 +205,14 @@ export default function HomeScreen() {
                 >
                   {category.name}
                 </ThemedText>
-                {category.count !== undefined && category.count > 0 && (
+                {category.codeCount !== undefined && category.codeCount > 0 && (
                   <ThemedText
                     style={[
                       styles.categoryCount,
                       selectedCategoryId === category.id && styles.categoryCountActive,
                     ]}
                   >
-                    {category.count}
+                    {category.codeCount}
                   </ThemedText>
                 )}
               </TouchableOpacity>

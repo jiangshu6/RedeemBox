@@ -3,11 +3,12 @@ import { router } from 'expo-router';
 import * as Notifications from 'expo-notifications';
 import { NotificationService, requestNotificationPermission } from '@/services/notification.service';
 import { useSettingsStore } from '@/store/settings.store';
+import { isDatabaseInitialized } from '@/services/database.service';
 
 /**
  * 通知Hook
  */
-export function useNotification() {
+export function useNotification(dbReady: boolean = true) {
   const notificationListener = useRef<Notifications.EventSubscription | null>(null);
   const responseListener = useRef<Notifications.EventSubscription | null>(null);
   const { notifyEnabled, loadSettings } = useSettingsStore();
@@ -16,6 +17,12 @@ export function useNotification() {
    * 初始化通知服务
    */
   const initialize = useCallback(async () => {
+    // 检查数据库是否已初始化
+    if (!isDatabaseInitialized()) {
+      console.log('数据库未初始化，跳过通知初始化');
+      return;
+    }
+
     // 加载设置
     await loadSettings();
 
@@ -71,9 +78,12 @@ export function useNotification() {
   }, [notifyEnabled]);
 
   useEffect(() => {
-    initialize();
+    // 只有在数据库准备好后才初始化
+    if (dbReady) {
+      initialize();
+    }
     return cleanup;
-  }, [initialize, cleanup]);
+  }, [dbReady, initialize, cleanup]);
 
   return {
     initialize,
