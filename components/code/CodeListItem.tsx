@@ -18,7 +18,7 @@ interface CodeListItemProps {
 
 /**
  * 兑换码列表项组件
- * 使用现代化的卡片样式
+ * 使用现代化的卡片样式，优化信息层级和视觉间距
  */
 export function CodeListItem({
   code,
@@ -32,53 +32,75 @@ export function CodeListItem({
   const daysUntilExpire = getDaysUntilExpire(code.expireDate);
   const expired = isExpired(code.expireDate);
 
+  // 获取类别颜色（用于左边框装饰）
+  const categoryColor = categoryName
+    ? colors.border
+    : 'transparent';
+
   return (
     <TouchableOpacity
       style={[
         styles.container,
         {
-          backgroundColor: colors.background,
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.08)',
+          backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.04)' : '#fff',
+          borderColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
         },
       ]}
       onPress={() => onPress(code)}
       onLongPress={() => onLongPress?.(code)}
       activeOpacity={0.7}
     >
-      {/* 状态徽章 */}
-      <View style={styles.header}>
-        <CodeStatusBadge status={code.status} />
-        {categoryName && (
-          <View style={[styles.categoryTag, { backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }]}>
-            <Text style={[styles.categoryText, { color: colors.icon }]}>
-              {categoryName}
+      {/* 左侧装饰条 - 类别颜色 */}
+      <View style={[styles.categoryStrip, { backgroundColor: categoryColor }]} />
+
+      {/* 卡片内容 */}
+      <View style={styles.content}>
+        {/* 状态行 */}
+        <View style={styles.header}>
+          <CodeStatusBadge status={code.status} />
+          {categoryName && (
+            <View style={styles.categoryBadge}>
+              <Text style={[styles.categoryText, { color: colors.icon }]}>
+                {categoryName}
+              </Text>
+            </View>
+          )}
+        </View>
+
+        {/* 兑换码内容 */}
+        <Text
+          selectable
+          style={[styles.code, { color: colors.text }]}
+          numberOfLines={2}
+          adjustsFontSizeToFit
+        >
+          {maskCode(code.code, 8)}
+        </Text>
+
+        {/* 备注和到期时间 */}
+        <View style={styles.footer}>
+          {code.description ? (
+            <Text
+              selectable
+              style={[styles.description, { color: colors.icon }]}
+              numberOfLines={1}
+            >
+              {code.description}
             </Text>
-          </View>
-        )}
-      </View>
-
-      {/* 兑换码内容 */}
-      <Text style={[styles.code, { color: colors.text }]} numberOfLines={2}>
-        {maskCode(code.code, 8)}
-      </Text>
-
-      {/* 备注和到期时间 */}
-      <View style={styles.footer}>
-        {code.description && (
-          <Text style={[styles.description, { color: colors.icon }]} numberOfLines={1}>
-            {code.description}
-          </Text>
-        )}
-        {code.expireDate && (
-          <Text
-            style={[
-              styles.expireDate,
-              { color: expired ? '#F44336' : colors.icon },
-            ]}
-          >
-            {expired ? '已过期' : `${daysUntilExpire}天后到期`}
-          </Text>
-        )}
+          ) : (
+            <View style={styles.flex} />
+          )}
+          {code.expireDate && (
+            <Text
+              style={[
+                styles.expireDate,
+                { color: expired ? '#E53935' : colors.icon },
+              ]}
+            >
+              {expired ? '已过期' : `${daysUntilExpire}天后到期`}
+            </Text>
+          )}
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -89,44 +111,58 @@ export function CodeListItem({
  */
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
-    borderRadius: 16,
-    marginBottom: 12,
+    flexDirection: 'row',
+    borderRadius: 12,
+    marginBottom: 8,
+    overflow: 'hidden',
     borderCurve: 'continuous',
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  categoryStrip: {
+    width: 3,
+    alignSelf: 'stretch',
+  },
+  content: {
+    flex: 1,
+    padding: 12,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
-    gap: 8,
+    marginBottom: 6,
+    gap: 6,
   },
-  categoryTag: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
+  categoryBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
   },
   categoryText: {
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: '500',
   },
   code: {
-    fontSize: 17,
+    fontSize: 15,
     fontWeight: '600',
-    marginBottom: 8,
+    marginBottom: 6,
     letterSpacing: 0.3,
+    fontFamily: 'ui-monospace',
   },
   footer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  flex: {
+    flex: 1,
+  },
   description: {
-    fontSize: 14,
+    fontSize: 12,
     flex: 1,
     marginRight: 8,
   },
   expireDate: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '500',
   },
 });

@@ -49,18 +49,13 @@ export default function SettingsScreen() {
     loadSettings();
   }, [loadSettings]);
 
-  // section背景色 - 深色模式下使用稍亮的背景
-  const sectionBgColor = colorScheme === 'dark' 
-    ? '#1c1c1e' 
-    : colors.background;
+  // section背景色
+  const sectionBgColor = colorScheme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)';
 
   // 分割线颜色
   const dividerColor = colorScheme === 'dark'
-    ? 'rgba(255,255,255,0.1)'
-    : 'rgba(0,0,0,0.1)';
-
-  // 图标颜色 - 深色模式下使用蓝色而不是白色
-  const iconColor = colorScheme === 'dark' ? '#0a7ea4' : colors.tint;
+    ? 'rgba(255,255,255,0.06)'
+    : 'rgba(0,0,0,0.04)';
 
   return (
     <ThemedView style={styles.container}>
@@ -68,8 +63,9 @@ export default function SettingsScreen() {
       <Stack.Screen options={{ headerShown: false }} />
 
       {/* 自定义工具栏 */}
-      <View style={[styles.toolbar, { paddingTop: insets.top }]}>
+      <View style={[styles.toolbar, { paddingTop: insets.top + 4 }]}>
         <ThemedText type="title" style={styles.toolbarTitle}>设置</ThemedText>
+        <View style={[styles.divider, { backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }]} />
       </View>
 
       <ScrollView
@@ -81,27 +77,30 @@ export default function SettingsScreen() {
         contentInsetAdjustmentBehavior="automatic"
       >
         {/* 通知设置 */}
-        <View style={[styles.section, { backgroundColor: sectionBgColor, borderColor: colors.border }]}>
-          <ThemedText style={styles.sectionTitle}>通知设置</ThemedText>
-          
+        <View style={[styles.section, { backgroundColor: sectionBgColor }]}>
           {/* 通知开关 */}
           <View style={[styles.settingRow, { borderBottomColor: dividerColor }]}>
             <View style={styles.settingLeft}>
-              <IconSymbol name="bell" size={22} color={iconColor} />
-              <Text style={[styles.settingLabel, { color: colors.text }]}>
-                开启通知
-              </Text>
+              <IconSymbol name="bell" size={22} color={colors.icon} />
+              <View style={styles.textGroup}>
+                <Text style={[styles.settingLabel, { color: colors.text }]}>
+                  开启通知
+                </Text>
+                <Text style={[styles.settingDesc, { color: colors.icon }]}>
+                  在到期前提醒您使用兑换码
+                </Text>
+              </View>
             </View>
             <Switch
               value={notifyEnabled}
-              onValueChange={() => { toggleNotifyEnabled(); }}
+              onValueChange={(value : boolean) => toggleNotifyEnabled()}
               trackColor={{ false: colors.border, true: '#0a7ea4' }}
               thumbColor="#fff"
             />
           </View>
 
           {/* 通知天数设置 */}
-          <View style={styles.settingItem}>
+          <View style={[styles.settingRow, { borderBottomColor: dividerColor }]}>
             <NotifyDaysSetting
               value={defaultNotifyDays}
               onChange={updateDefaultNotifyDays}
@@ -110,7 +109,7 @@ export default function SettingsScreen() {
           </View>
 
           {/* 通知时间设置 */}
-          <View style={styles.settingItem}>
+          <View style={styles.settingRow}>
             <NotifyTimeSetting
               value={notifyTime}
               onChange={updateNotifyTime}
@@ -120,10 +119,8 @@ export default function SettingsScreen() {
         </View>
 
         {/* 外观设置 */}
-        <View style={[styles.section, { backgroundColor: sectionBgColor, borderColor: colors.border }]}>
-          <ThemedText style={styles.sectionTitle}>外观</ThemedText>
-          
-          <View style={styles.settingItem}>
+        <View style={[styles.section, { backgroundColor: sectionBgColor }]}>
+          <View style={styles.settingRow}>
             <ThemeModeSetting
               value={themeMode}
               onChange={updateThemeMode}
@@ -132,59 +129,55 @@ export default function SettingsScreen() {
         </View>
 
         {/* 数据管理 */}
-        <View style={[styles.section, { backgroundColor: sectionBgColor, borderColor: colors.border }]}>
-          <ThemedText style={styles.sectionTitle}>数据管理</ThemedText>
-          
-          {/* 数据备份 */}
+        <View style={[styles.section, { backgroundColor: sectionBgColor }]}>
           <TouchableOpacity
-            style={[styles.settingRow, { borderBottomColor: dividerColor }]}
+            style={[styles.actionRow, { borderBottomColor: dividerColor }]}
             onPress={handleExport}
+            activeOpacity={0.7}
           >
             <View style={styles.settingLeft}>
-              <IconSymbol name="upload" size={22} color={iconColor} />
+              <IconSymbol name="square-and-arrow-up" size={22} color={colors.icon} />
               <Text style={[styles.settingLabel, { color: colors.text }]}>
                 数据备份
               </Text>
             </View>
-            <IconSymbol name="chevron-right" size={16} color={colors.icon} />
+            <IconSymbol name="angle-right" size={16} color={colors.icon} />
           </TouchableOpacity>
 
-          {/* 数据导入 */}
           <TouchableOpacity
-            style={[styles.settingRow, { borderBottomColor: dividerColor }]}
+            style={[styles.actionRow, { borderBottomColor: dividerColor }]}
             onPress={handleImport}
+            activeOpacity={0.7}
           >
             <View style={styles.settingLeft}>
-              <IconSymbol name="download" size={22} color={iconColor} />
+              <IconSymbol name="square-and-arrow-down" size={22} color={colors.icon} />
               <Text style={[styles.settingLabel, { color: colors.text }]}>
                 数据导入
               </Text>
             </View>
-            <IconSymbol name="chevron-right" size={16} color={colors.icon} />
+            <IconSymbol name="angle-right" size={16} color={colors.icon} />
           </TouchableOpacity>
           
-          {/* 通知历史 */}
           <TouchableOpacity
-            style={styles.settingRow}
+            style={styles.actionRow}
             onPress={() => router.push('/notification/history')}
+            activeOpacity={0.7}
           >
             <View style={styles.settingLeft}>
-              <IconSymbol name="clock" size={22} color={iconColor} />
+              <IconSymbol name="clock" size={22} color={colors.icon} />
               <Text style={[styles.settingLabel, { color: colors.text }]}>
                 通知历史
               </Text>
             </View>
-            <IconSymbol name="chevron-right" size={16} color={colors.icon} />
+            <IconSymbol name="angle-right" size={16} color={colors.icon} />
           </TouchableOpacity>
         </View>
 
         {/* 关于 */}
-        <View style={[styles.section, { backgroundColor: sectionBgColor, borderColor: colors.border }]}>
-          <ThemedText style={styles.sectionTitle}>关于</ThemedText>
-          
-          <View style={[styles.settingRow, { borderBottomColor: dividerColor }]}>
+        <View style={[styles.section, { backgroundColor: sectionBgColor }]}>
+          <View style={[styles.actionRow, { borderBottomColor: dividerColor }]}>
             <View style={styles.settingLeft}>
-              <IconSymbol name="circle-info" size={22} color={iconColor} />
+              <IconSymbol name="circle-info" size={22} color={colors.icon} />
               <Text style={[styles.settingLabel, { color: colors.text }]}>
                 版本
               </Text>
@@ -194,13 +187,13 @@ export default function SettingsScreen() {
             </Text>
           </View>
 
-          {/* 重置设置 */}
           <TouchableOpacity
-            style={styles.settingRow}
+            style={styles.actionRow}
             onPress={resetToDefaults}
+            activeOpacity={0.7}
           >
             <View style={styles.settingLeft}>
-              <IconSymbol name="rotate-left" size={22} color="#F44336" />
+              <IconSymbol name="arrow-triangle-2-circlepath" size={22} color="#F44336" />
               <Text style={[styles.settingLabel, { color: '#F44336' }]}>
                 重置所有设置
               </Text>
@@ -244,24 +237,27 @@ const styles = StyleSheet.create({
   },
   toolbar: {
     paddingHorizontal: 16,
-    paddingBottom: 12,
+    paddingBottom: 8,
   },
   toolbarTitle: {
-    fontSize: 20,
-    fontWeight: '600',
+    fontSize: 24,
+    fontWeight: '700',
+  },
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    marginTop: 8,
   },
   content: {
     flex: 1,
   },
   contentContainer: {
-    padding: 16,
+    padding: 12,
     paddingTop: 0,
   },
   section: {
     borderRadius: 16,
-    borderWidth: 1,
-    padding: 16,
-    marginBottom: 16,
+    overflow: 'hidden',
+    marginBottom: 12,
     borderCurve: 'continuous',
   },
   sectionTitle: {
@@ -275,21 +271,33 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 12,
+    padding: 16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  actionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   settingLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+    flex: 1,
+  },
+  textGroup: {
+    gap: 2,
   },
   settingLabel: {
-    fontSize: 16,
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  settingDesc: {
+    fontSize: 13,
   },
   settingValue: {
-    fontSize: 16,
-  },
-  settingItem: {
-    paddingTop: 8,
+    fontSize: 14,
   },
 });

@@ -2,12 +2,12 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 import { ThemeMode } from '@/types';
-import { IconSymbol, IconName } from '@/components/ui/icon-symbol';
 
-/**
- * 主题色 - 在深色和浅色模式下都使用蓝色
- */
-const ACCENT_COLOR = '#0a7ea4';
+const THEME_MODES: { mode: ThemeMode; label: string }[] = [
+  { mode: 'system', label: '跟随系统' },
+  { mode: 'light', label: '浅色' },
+  { mode: 'dark', label: '深色' },
+];
 
 /**
  * 主题模式设置属性
@@ -18,93 +18,98 @@ interface ThemeModeSettingProps {
 }
 
 /**
- * 主题模式选项
- */
-const themeOptions: { mode: ThemeMode; label: string; icon: IconName }[] = [
-  { mode: 'light', label: '浅色', icon: 'sun' },
-  { mode: 'dark', label: '深色', icon: 'moon' },
-  { mode: 'system', label: '跟随系统', icon: 'gear' },
-];
-
-/**
  * 主题模式设置组件
- * 使用现代化的卡片样式
+ * 行内切换模式，使用分段控件
  */
-export function ThemeModeSetting({ value, onChange }: ThemeModeSettingProps) {
+export function ThemeModeSetting({
+  value,
+  onChange,
+}: ThemeModeSettingProps) {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
 
+  const currentLabel = THEME_MODES.find(m => m.mode === value)?.label || '跟随系统';
+
   return (
-    <View style={styles.container}>
-      <Text style={[styles.label, { color: colors.icon }]}>主题模式</Text>
-      <View style={styles.options}>
-        {themeOptions.map((option) => (
-          <TouchableOpacity
-            key={option.mode}
-            style={[
-              styles.option,
-              {
-                backgroundColor:
-                  value === option.mode
-                    ? ACCENT_COLOR
-                    : colorScheme === 'dark'
-                    ? 'rgba(255,255,255,0.08)'
-                    : 'rgba(0,0,0,0.04)',
-                boxShadow: value === option.mode
-                  ? '0 2px 8px rgba(0, 122, 255, 0.25)'
-                  : 'none',
-              },
-            ]}
-            onPress={() => onChange(option.mode)}
-          >
-            <IconSymbol
-              name={option.icon}
-              size={22}
-              color={value === option.mode ? '#fff' : colors.text}
-            />
-            <Text
+    <View style={styles.row}>
+      <View style={styles.settingLeft}>
+        <Text style={[styles.settingLabel, { color: colors.text }]}>
+          主题模式
+        </Text>
+        <Text style={[styles.settingDesc, { color: colors.icon }]}>
+          当前{currentLabel}
+        </Text>
+      </View>
+      <View style={[styles.segmentedControl, { backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }]}>
+        {THEME_MODES.map((item) => {
+          const isActive = value === item.mode;
+          return (
+            <TouchableOpacity
+              key={item.mode}
               style={[
-                styles.optionText,
-                { color: value === option.mode ? '#fff' : colors.text },
+                styles.segmentButton,
+                isActive && [
+                  styles.segmentButtonActive,
+                  { backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.12)' : '#fff' },
+                ],
               ]}
+              onPress={() => onChange(item.mode)}
+              activeOpacity={0.7}
             >
-              {option.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
+              <Text
+                style={[
+                  styles.segmentText,
+                  { color: isActive ? colors.text : colors.icon },
+                ]}
+              >
+                {item.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
     </View>
   );
 }
 
-/**
- * 样式
- */
 const styles = StyleSheet.create({
-  container: {
-    marginBottom: 24,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '500',
-    marginBottom: 12,
-  },
-  options: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  option: {
-    flex: 1,
+  row: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 14,
-    borderRadius: 14,
-    gap: 8,
-    borderCurve: 'continuous',
+    justifyContent: 'space-between',
+    width: '100%',
+    gap: 12,
   },
-  optionText: {
+  settingLeft: {
+    flex: 1,
+    gap: 2,
+  },
+  settingLabel: {
     fontSize: 15,
+    fontWeight: '500',
+  },
+  settingDesc: {
+    fontSize: 13,
+  },
+  segmentedControl: {
+    flexDirection: 'row',
+    borderRadius: 8,
+    padding: 2,
+  },
+  segmentButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  segmentButtonActive: {
+    shadowOpacity: 0.08,
+    shadowOffset: { width: 0, height: 1 },
+    shadowRadius: 2,
+  },
+  segmentText: {
+    fontSize: 13,
     fontWeight: '500',
   },
 });

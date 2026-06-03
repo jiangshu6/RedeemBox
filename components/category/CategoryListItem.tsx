@@ -16,7 +16,7 @@ interface CategoryListItemProps {
 
 /**
  * 类别列表项组件
- * 使用现代化的卡片样式
+ * 使用现代化的卡片样式，与兑换码卡片保持一致
  */
 export function CategoryListItem({
   category,
@@ -32,24 +32,30 @@ export function CategoryListItem({
       style={[
         styles.container,
         {
-          backgroundColor: colors.background,
-          boxShadow: selected
-            ? `0 0 0 2px ${colors.tint}`
-            : '0 1px 3px rgba(0, 0, 0, 0.08)',
+          backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.04)' : '#fff',
+          borderColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
         },
       ]}
       onPress={() => onPress(category)}
       onLongPress={() => onLongPress?.(category)}
       activeOpacity={0.7}
     >
-      <View style={[styles.colorDot, { backgroundColor: category.color }]} />
+      {/* 左侧颜色条 */}
+      <View style={[styles.colorStrip, { backgroundColor: category.color }]} />
+
       <View style={styles.content}>
-        <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
+        <Text
+          selectable
+          style={[styles.name, { color: colors.text }]}
+          numberOfLines={1}
+        >
           {category.name}
         </Text>
-        <Text style={[styles.count, { color: colors.icon }]}>
-          {formatCodeCount(category.codeCount)}
-        </Text>
+        <View style={styles.badge}>
+          <Text style={[styles.badgeText, { color: colors.icon }]}>
+            {formatCodeCount(category.codeCount)}
+          </Text>
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -61,32 +67,35 @@ export function CategoryListItem({
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    borderRadius: 16,
-    marginBottom: 12,
+    borderRadius: 12,
+    marginBottom: 8,
+    overflow: 'hidden',
     borderCurve: 'continuous',
+    borderWidth: StyleSheet.hairlineWidth,
   },
-  colorDot: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    marginRight: 14,
+  colorStrip: {
+    width: 4,
+    alignSelf: 'stretch',
   },
   content: {
     flex: 1,
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 12,
   },
   name: {
-    fontSize: 17,
-    fontWeight: '500',
+    fontSize: 15,
+    fontWeight: '600',
     flex: 1,
   },
-  count: {
-    fontSize: 15,
-    marginLeft: 8,
+  badge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  badgeText: {
+    fontSize: 12,
     fontWeight: '500',
   },
 });

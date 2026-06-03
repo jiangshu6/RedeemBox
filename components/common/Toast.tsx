@@ -1,7 +1,5 @@
 import { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { Colors } from '@/constants/theme';
 
 /**
  * Toast类型
@@ -50,9 +48,6 @@ export function Toast({
   duration = 3000,
   onHide,
 }: ToastProps) {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
-
   useEffect(() => {
     if (visible) {
       const timer = setTimeout(() => {

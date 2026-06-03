@@ -39,6 +39,7 @@ export default function HomeScreen() {
 
   const [refreshing, setRefreshing] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const [searchExpanded, setSearchExpanded] = useState(false);
 
   // 当前选中的类别ID（null表示全部）
   const selectedCategoryId = filter.categoryIds.length > 0 ? filter.categoryIds[0] : null;
@@ -79,6 +80,11 @@ export default function HomeScreen() {
     await loadCodes();
     setRefreshing(false);
   }, [loadCodes]);
+
+  // 切换搜索展开状态
+  const toggleSearch = useCallback(() => {
+    setSearchExpanded((prev) => !prev);
+  }, []);
 
   // 点击兑换码
   const handlePressCode = useCallback((code: RedemptionCode) => {
@@ -126,6 +132,9 @@ export default function HomeScreen() {
     ? 'rgba(0, 122, 255, 0.6)' 
     : 'rgba(0, 122, 255, 0.4)';
 
+  // 背景色 - 区分内容区域
+  const filterBgColor = colorScheme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)';
+
   // 是否显示空状态（已初始化且没有数据且不在加载中）
   const showEmpty = initialized && filteredCodes.length === 0 && !loading;
 
@@ -135,28 +144,45 @@ export default function HomeScreen() {
       <Stack.Screen options={{ headerShown: false }} />
 
       {/* 自定义工具栏 */}
-      <View style={[styles.toolbar, { paddingTop: insets.top }]}>
-        <ThemedText type="title" style={styles.toolbarTitle}>兑换码</ThemedText>
+      <View style={[styles.toolbar, { paddingTop: insets.top + 4 }]}>
+        <View style={styles.toolbarRow}>
+          <ThemedText type="title" style={styles.toolbarTitle}>兑换码</ThemedText>
+          <TouchableOpacity
+            style={styles.toolbarButton}
+            onPress={toggleSearch}
+            activeOpacity={0.7}
+          >
+            <IconSymbol
+              name={searchExpanded ? 'chevron-down' : 'magnifying-glass'}
+              size={22}
+              color={colors.icon}
+            />
+          </TouchableOpacity>
+        </View>
+        <View style={[styles.divider, { backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }]} />
       </View>
 
-      {/* 搜索栏 */}
-      <View style={styles.searchBar}>
-        <CodeSearchBar onSearch={search} />
-      </View>
+      {/* 搜索栏 - 展开时显示 */}
+      <CodeSearchBar
+        onSearch={search}
+        onClose={() => setSearchExpanded(false)}
+        expanded={searchExpanded}
+      />
 
-      {/* 类别筛选标签 */}
-      {categories.length > 0 && (
-        <View style={styles.categoryFilterContainer}>
+      {/* 筛选区域 - 组合在一起 */}
+      <View style={[styles.filterSection, { backgroundColor: filterBgColor }]}>
+        {/* 类别筛选 */}
+        {categories.length > 0 && (
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.categoryFilterContent}
+            contentContainerStyle={styles.filterRow}
           >
             {/* 全部选项 */}
             <TouchableOpacity
               style={[
-                styles.categoryTag,
-                selectedCategoryId === null && styles.categoryTagActive,
+                styles.filterChip,
+                selectedCategoryId === null && styles.filterChipActive,
                 {
                   backgroundColor: selectedCategoryId === null
                     ? '#0a7ea4'
@@ -166,11 +192,13 @@ export default function HomeScreen() {
                 },
               ]}
               onPress={() => handleSelectCategory(null)}
+              activeOpacity={0.7}
             >
+              <IconSymbol name="tag" size={14} color={selectedCategoryId === null ? '#fff' : colors.icon} />
               <ThemedText
                 style={[
-                  styles.categoryTagText,
-                  selectedCategoryId === null && styles.categoryTagTextActive,
+                  styles.filterChipText,
+                  selectedCategoryId === null && styles.filterChipTextActive,
                 ]}
               >
                 全部
@@ -182,8 +210,8 @@ export default function HomeScreen() {
               <TouchableOpacity
                 key={category.id}
                 style={[
-                  styles.categoryTag,
-                  selectedCategoryId === category.id && styles.categoryTagActive,
+                  styles.filterChip,
+                  selectedCategoryId === category.id && styles.filterChipActive,
                   {
                     backgroundColor: selectedCategoryId === category.id
                       ? category.color
@@ -193,11 +221,13 @@ export default function HomeScreen() {
                   },
                 ]}
                 onPress={() => handleSelectCategory(category.id)}
+                activeOpacity={0.7}
               >
+                <View style={[styles.categoryDot, { backgroundColor: selectedCategoryId === category.id ? '#fff' : category.color }]} />
                 <ThemedText
                   style={[
-                    styles.categoryTagText,
-                    selectedCategoryId === category.id && styles.categoryTagTextActive,
+                    styles.filterChipText,
+                    selectedCategoryId === category.id && styles.filterChipTextActive,
                   ]}
                 >
                   {category.name}
@@ -205,8 +235,8 @@ export default function HomeScreen() {
                 {category.codeCount !== undefined && category.codeCount > 0 && (
                   <ThemedText
                     style={[
-                      styles.categoryCount,
-                      selectedCategoryId === category.id && styles.categoryCountActive,
+                      styles.filterChipCount,
+                      selectedCategoryId === category.id && styles.filterChipCountActive,
                     ]}
                   >
                     {category.codeCount}
@@ -215,21 +245,24 @@ export default function HomeScreen() {
               </TouchableOpacity>
             ))}
           </ScrollView>
-        </View>
-      )}
+        )}
 
-      {/* 状态筛选标签 */}
-      <View style={styles.statusFilterContainer}>
+        {/* 分隔线 */}
+        {categories.length > 0 && (
+          <View style={[styles.filterDivider, { backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }]} />
+        )}
+
+        {/* 状态筛选 */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.statusFilterContent}
+          contentContainerStyle={styles.filterRow}
         >
           {/* 全部状态 */}
           <TouchableOpacity
             style={[
-              styles.statusTag,
-              filter.status === null && styles.statusTagActive,
+              styles.statusChip,
+              filter.status === null && styles.statusChipActive,
               {
                 backgroundColor: filter.status === null
                   ? '#0a7ea4'
@@ -239,14 +272,15 @@ export default function HomeScreen() {
               },
             ]}
             onPress={() => handleSelectStatus(null)}
+            activeOpacity={0.7}
           >
             <ThemedText
               style={[
-                styles.statusTagText,
-                filter.status === null && styles.statusTagTextActive,
+                styles.statusChipText,
+                filter.status === null && styles.statusChipTextActive,
               ]}
             >
-              全部
+              全部状态
             </ThemedText>
           </TouchableOpacity>
 
@@ -255,8 +289,8 @@ export default function HomeScreen() {
             <TouchableOpacity
               key={option.value}
               style={[
-                styles.statusTag,
-                filter.status === option.value && styles.statusTagActive,
+                styles.statusChip,
+                filter.status === option.value && styles.statusChipActive,
                 {
                   backgroundColor: filter.status === option.value
                     ? option.color
@@ -266,12 +300,13 @@ export default function HomeScreen() {
                 },
               ]}
               onPress={() => handleSelectStatus(option.value)}
+              activeOpacity={0.7}
             >
               <View style={[styles.statusDot, { backgroundColor: option.color }]} />
               <ThemedText
                 style={[
-                  styles.statusTagText,
-                  filter.status === option.value && styles.statusTagTextActive,
+                  styles.statusChipText,
+                  filter.status === option.value && styles.statusChipTextActive,
                 ]}
               >
                 {option.label}
@@ -289,8 +324,6 @@ export default function HomeScreen() {
         <EmptyState
           title="暂无兑换码"
           description="点击右下角按钮添加第一个兑换码"
-          actionText="添加兑换码"
-          onAction={handleAddCode}
           icon={<IconSymbol name="ticket" size={48} color={colors.icon} />}
         />
       ) : initialized && (
@@ -316,23 +349,21 @@ export default function HomeScreen() {
         />
       )}
 
-      {/* 悬浮添加按钮 - 只在有兑换码时显示 */}
-      {filteredCodes.length > 0 && (
-        <TouchableOpacity
-          style={[
-            styles.fab,
-            {
-              backgroundColor: colorScheme === 'dark' ? '#0a7ea4' : colors.tint,
-              bottom: insets.bottom + 20,
-              boxShadow: `0 4px 16px ${fabShadowColor}`,
-            },
-          ]}
-          onPress={handleAddCode}
-          activeOpacity={0.8}
-        >
-          <IconSymbol name="plus" size={28} color="#fff" />
-        </TouchableOpacity>
-      )}
+      {/* 悬浮添加按钮 */}
+      <TouchableOpacity
+        style={[
+          styles.fab,
+          {
+            backgroundColor: colorScheme === 'dark' ? '#0a7ea4' : colors.tint,
+            bottom: insets.bottom + 20,
+            boxShadow: `0 4px 16px ${fabShadowColor}`,
+          },
+        ]}
+        onPress={handleAddCode}
+        activeOpacity={0.8}
+      >
+        <IconSymbol name="plus" size={28} color="#fff" />
+      </TouchableOpacity>
 
       {/* 确认对话框 */}
       <ConfirmDialog
@@ -366,98 +397,119 @@ const styles = StyleSheet.create({
   },
   toolbar: {
     paddingHorizontal: 16,
-    paddingBottom: 12,
-  },
-  toolbarTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-  },
-  searchBar: {
-    paddingHorizontal: 16,
     paddingBottom: 8,
   },
-  categoryFilterContainer: {
-    paddingBottom: 8,
-  },
-  categoryFilterContent: {
-    paddingHorizontal: 16,
-    gap: 8,
-    flexDirection: 'row',
-  },
-  categoryTag: {
+  toolbarRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 14,
+    justifyContent: 'space-between',
+  },
+  toolbarTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+  },
+  toolbarButton: {
+    padding: 8,
+    minHeight: 44,
+    minWidth: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    marginTop: 8,
+  },
+  filterSection: {
+    marginBottom: 8,
+  },
+  filterRow: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    gap: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  filterDivider: {
+    height: StyleSheet.hairlineWidth,
+    marginHorizontal: 16,
+    marginVertical: 4,
+  },
+  filterChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
     gap: 6,
+    minWidth: 44,
+    minHeight: 36,
   },
-  categoryTagActive: {
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
+  filterChipActive: {
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
-  categoryTagText: {
-    fontSize: 14,
+  filterChipText: {
+    fontSize: 13,
     fontWeight: '500',
   },
-  categoryTagTextActive: {
-    color: '#fff',
-  },
-  categoryCount: {
-    fontSize: 12,
-    opacity: 0.7,
-  },
-  categoryCountActive: {
-    color: '#fff',
-    opacity: 0.9,
-  },
-  statusFilterContainer: {
-    paddingBottom: 8,
-  },
-  statusFilterContent: {
-    paddingHorizontal: 16,
-    gap: 8,
-    flexDirection: 'row',
-  },
-  statusTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 20,
-    gap: 6,
-  },
-  statusTagActive: {
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
-  },
-  statusTagText: {
-    fontSize: 13,
-    fontWeight: '400',
-  },
-  statusTagTextActive: {
+  filterChipTextActive: {
     color: '#fff',
     fontWeight: '600',
   },
-  statusDot: {
+  filterChipCount: {
+    fontSize: 11,
+    opacity: 0.7,
+  },
+  filterChipCountActive: {
+    color: '#fff',
+    opacity: 0.9,
+  },
+  categoryDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
   },
+  statusChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 6,
+    minWidth: 44,
+    minHeight: 32,
+  },
+  statusChipActive: {
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
+  },
+  statusChipText: {
+    fontSize: 12,
+    fontWeight: '400',
+  },
+  statusChipTextActive: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+  statusDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+  },
   listContent: {
-    padding: 16,
+    padding: 12,
     paddingTop: 0,
   },
   fab: {
     position: 'absolute',
-    right: 20,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    right: 16,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
     borderCurve: 'continuous',

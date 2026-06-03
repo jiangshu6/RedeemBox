@@ -1,11 +1,8 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useState } from 'react';
+import { View, Text, StyleSheet, TextInput } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
-
-/**
- * 主题色 - 在深色和浅色模式下都使用蓝色
- */
-const ACCENT_COLOR = '#0a7ea4';
+import { Button } from '@/components/common/Button';
 
 /**
  * 通知天数设置属性
@@ -18,7 +15,7 @@ interface NotifyDaysSettingProps {
 
 /**
  * 通知天数设置组件
- * 使用现代化的样式
+ * 行内编辑模式，与设置页风格统一
  */
 export function NotifyDaysSetting({
   value,
@@ -27,85 +24,150 @@ export function NotifyDaysSetting({
 }: NotifyDaysSettingProps) {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+  const [inputValue, setInputValue] = useState(value.toString());
+  const [isEditing, setIsEditing] = useState(false);
 
-  const presetDays = [1, 3, 7, 14, 30];
+  const handleSave = () => {
+    const days = parseInt(inputValue, 10);
+    if (isNaN(days) || days <= 0 || days > 365) {
+      useUIStore.getState().showToast('请输入1-365之间的数字', 'error');
+      setInputValue(value.toString());
+      setIsEditing(false);
+      return;
+    }
 
-  return (
-    <View style={styles.container}>
-      <Text style={[styles.label, { color: colors.icon }]}>
-        默认提前通知天数
-      </Text>
-      <View style={styles.options}>
-        {presetDays.map((days) => (
-          <TouchableOpacity
-            key={days}
+    onChange(days);
+    setIsEditing(false);
+    useUIStore.getState().showToast('已保存', 'success');
+  };
+
+  const handleCancel = () => {
+    setInputValue(value.toString());
+    setIsEditing(false);
+  };
+
+  const handleEdit = () => {
+    setInputValue(value.toString());
+    setIsEditing(true);
+  };
+
+  if (isEditing) {
+    return (
+      <View style={styles.editRow}>
+        <View style={styles.settingLeft}>
+          <Text style={[styles.settingLabel, { color: colors.text }]}>
+            提前天数
+          </Text>
+          <Text style={[styles.settingDesc, { color: colors.icon }]}>
+            1-365天
+          </Text>
+        </View>
+        <View style={styles.editControls}>
+          <TextInput
             style={[
-              styles.option,
+              styles.input,
               {
-                backgroundColor:
-                  value === days
-                    ? ACCENT_COLOR
-                    : colorScheme === 'dark'
-                    ? 'rgba(255,255,255,0.08)'
-                    : 'rgba(0,0,0,0.04)',
-                boxShadow: value === days
-                  ? '0 2px 8px rgba(0, 122, 255, 0.25)'
-                  : 'none',
-                opacity: disabled ? 0.5 : 1,
+                backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.06)' : '#f5f5f5',
+                color: colors.text,
               },
             ]}
-            onPress={() => !disabled && onChange(days)}
-            disabled={disabled}
-          >
-            <Text
-              style={[
-                styles.optionText,
-                { color: value === days ? '#fff' : colors.text },
-              ]}
-            >
-              {days}天
-            </Text>
-          </TouchableOpacity>
-        ))}
+            value={inputValue}
+            onChangeText={setInputValue}
+            keyboardType="number-pad"
+            maxLength={3}
+            autoFocus
+            onSubmitEditing={handleSave}
+          />
+          <View style={styles.editButtons}>
+            <Button
+              title="取消"
+              onPress={handleCancel}
+              variant="outlined"
+              size="small"
+              style={styles.buttonSmall}
+            />
+            <Button
+              title="保存"
+              onPress={handleSave}
+              variant="filled"
+              size="small"
+              style={styles.buttonSmall}
+            />
+          </View>
+        </View>
       </View>
-      <Text style={[styles.hint, { color: colors.icon }]}>
-        新建兑换码时默认使用此设置
-      </Text>
+    );
+  }
+
+  return (
+    <View style={styles.row}>
+      <View style={styles.settingLeft}>
+        <Text style={[styles.settingLabel, { color: colors.text }]}>
+          提前天数
+        </Text>
+        <Text style={[styles.settingDesc, { color: colors.icon }]}>
+          到期前{value}天提醒
+        </Text>
+      </View>
+      <Button
+        title={value > 1 ? `${value}天` : `${value}天`}
+        onPress={handleEdit}
+        variant="outlined"
+        size="small"
+        disabled={disabled}
+        style={styles.valueButton}
+        textStyle={{ fontSize: 14 }}
+      />
     </View>
   );
 }
 
-/**
- * 样式
- */
 const styles = StyleSheet.create({
-  container: {
-    marginBottom: 24,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '500',
-    marginBottom: 12,
-  },
-  options: {
+  row: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-  },
-  option: {
-    paddingHorizontal: 18,
-    paddingVertical: 12,
-    borderRadius: 12,
-    minWidth: 64,
     alignItems: 'center',
-    borderCurve: 'continuous',
+    justifyContent: 'space-between',
+    width: '100%',
   },
-  optionText: {
+  editRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  settingLeft: {
+    flex: 1,
+    gap: 2,
+  },
+  settingLabel: {
     fontSize: 15,
-    fontWeight: '600',
+    fontWeight: '500',
   },
-  hint: {
+  settingDesc: {
     fontSize: 13,
-    marginTop: 10,
+  },
+  editControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  input: {
+    width: 60,
+    height: 36,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  editButtons: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  buttonSmall: {
+    minWidth: 0,
+    paddingHorizontal: 12,
+  },
+  valueButton: {
+    minWidth: 56,
   },
 });

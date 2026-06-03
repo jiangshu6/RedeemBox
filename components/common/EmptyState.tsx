@@ -21,6 +21,7 @@ interface EmptyStateProps {
 
 /**
  * 空状态组件
+ * 优化了视觉层次和间距
  */
 export function EmptyState({
   title,
@@ -34,7 +35,21 @@ export function EmptyState({
 
   return (
     <View style={styles.container}>
-      {icon && <View style={styles.iconContainer}>{icon}</View>}
+      {/* 图标容器 */}
+      {icon && (
+        <View
+          style={[
+            styles.iconContainer,
+            {
+              backgroundColor: colorScheme === 'dark'
+                ? 'rgba(255,255,255,0.05)'
+                : 'rgba(0,0,0,0.04)',
+            },
+          ]}
+        >
+          {icon}
+        </View>
+      )}
       <Text style={[styles.title, { color: colors.text }]}>
         {title}
       </Text>
@@ -65,15 +80,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 32,
+    gap: 8,
   },
   iconContainer: {
     marginBottom: 16,
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   title: {
     fontSize: 18,
     fontWeight: '600',
     textAlign: 'center',
-    marginBottom: 8,
   },
   description: {
     fontSize: 14,
@@ -82,6 +102,6 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   button: {
-    minWidth: 140,
+    minWidth: 160,
   },
 });

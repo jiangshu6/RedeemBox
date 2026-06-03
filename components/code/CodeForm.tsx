@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   View,
   Text,
@@ -10,10 +10,9 @@ import {
 } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
-import { PRESET_COLORS, NotificationConstants } from '@/constants';
 import { Button } from '@/components/common/Button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Category, RedemptionCodeStatus } from '@/types';
+import { Category } from '@/types';
 import { formatDate } from '@/utils/date';
 
 /**

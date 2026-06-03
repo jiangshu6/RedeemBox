@@ -6,7 +6,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 import { useCodeForm } from '@/hooks/useCodeForm';
 import { CodeForm } from '@/components/code';
-import { Button, Toast, Loading } from '@/components/common';
+import { Button, Toast } from '@/components/common';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';

@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router/stack';
 import { StatusBar } from 'expo-status-bar';
-import { View, ActivityIndicator, Text, StyleSheet, LogBox } from 'react-native';
+import * as SplashScreen from 'expo-splash-screen';
+import { View, Text, StyleSheet, LogBox } from 'react-native';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -14,6 +15,9 @@ import { initDatabase } from '@/services/database.service';
 LogBox.ignoreLogs([
   'expo-notifications: Android Push notifications',
 ]);
+
+// 防止启动画面自动隐藏
+SplashScreen.preventAutoHideAsync();
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -41,28 +45,30 @@ export default function RootLayout() {
         // 加载设置（包括主题模式）
         await loadSettings();
         setDbReady(true);
+        // 隐藏启动画面
+        await SplashScreen.hideAsync();
       } catch (error) {
         console.error('数据库初始化失败:', error);
         setDbError('数据库初始化失败');
+        // 即使出错也隐藏启动画面
+        await SplashScreen.hideAsync();
       }
     };
     init();
   }, [loadSettings]);
 
-  // 数据库未准备好时显示加载状态
-  if (!dbReady) {
+  // 数据库初始化出错时显示错误信息
+  if (dbError) {
     return (
-      <View style={styles.loadingContainer}>
-        {dbError ? (
-          <Text style={styles.errorText}>{dbError}</Text>
-        ) : (
-          <>
-            <ActivityIndicator size="large" color="#0a7ea4" />
-            <Text style={styles.loadingText}>正在初始化...</Text>
-          </>
-        )}
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>{dbError}</Text>
       </View>
     );
+  }
+
+  // 数据库未准备好时不渲染内容（保持启动画面）
+  if (!dbReady) {
+    return null;
   }
 
   return (
@@ -102,22 +108,17 @@ export default function RootLayout() {
           }}
         />
       </Stack>
-      <StatusBar style="auto" />
+      <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
     </ThemeProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  loadingContainer: {
+  errorContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#fff',
-    gap: 16,
-  },
-  loadingText: {
-    fontSize: 16,
-    color: '#666',
   },
   errorText: {
     fontSize: 16,

@@ -101,29 +101,26 @@ export default function CategoryScreen() {
     });
   }, [editingCategory, deleteCategoryFromStore]);
 
+  const fabShadowColor = colorScheme === 'dark'
+    ? 'rgba(0, 122, 255, 0.6)'
+    : 'rgba(0, 122, 255, 0.4)';
+
   return (
     <ThemedView style={styles.container}>
       {/* 隐藏原生导航栏 */}
       <Stack.Screen options={{ headerShown: false }} />
 
       {/* 自定义工具栏 */}
-      <View style={[styles.toolbar, { paddingTop: insets.top }]}>
+      <View style={[styles.toolbar, { paddingTop: insets.top + 4 }]}>
         <ThemedText type="title" style={styles.toolbarTitle}>类别管理</ThemedText>
-        <TouchableOpacity
-          style={[styles.addButton, { backgroundColor: colorScheme === 'dark' ? '#0a7ea4' : colors.tint }]}
-          onPress={handleAddCategory}
-        >
-          <IconSymbol name="plus" size={20} color="#fff" />
-        </TouchableOpacity>
+        <View style={[styles.divider, { backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }]} />
       </View>
 
       {/* 类别列表 */}
       {categories.length === 0 && !loading ? (
         <EmptyState
           title="暂无类别"
-          description="点击右上角按钮创建第一个类别"
-          actionText="创建类别"
-          onAction={handleAddCategory}
+          description="点击右下角按钮创建第一个类别"
           icon={<IconSymbol name="folder" size={48} color={colors.icon} />}
         />
       ) : (
@@ -138,11 +135,29 @@ export default function CategoryScreen() {
           )}
           contentContainerStyle={[
             styles.listContent,
-            { paddingBottom: 20 + insets.bottom },
+            { paddingBottom: 100 + insets.bottom },
           ]}
           showsVerticalScrollIndicator={false}
           contentInsetAdjustmentBehavior="automatic"
         />
+      )}
+
+      {/* 悬浮添加按钮 */}
+      {categories.length > 0 && (
+        <TouchableOpacity
+          style={[
+            styles.fab,
+            {
+              backgroundColor: colorScheme === 'dark' ? '#0a7ea4' : colors.tint,
+              bottom: insets.bottom + 20,
+              boxShadow: `0 4px 16px ${fabShadowColor}`,
+            },
+          ]}
+          onPress={handleAddCategory}
+          activeOpacity={0.8}
+        >
+          <IconSymbol name="plus" size={28} color="#fff" />
+        </TouchableOpacity>
       )}
 
       {/* 类别表单弹窗 */}
@@ -185,25 +200,29 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   toolbar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingBottom: 12,
+    paddingBottom: 8,
   },
   toolbarTitle: {
-    fontSize: 20,
-    fontWeight: '600',
+    fontSize: 24,
+    fontWeight: '700',
   },
-  addButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    marginTop: 8,
   },
   listContent: {
-    padding: 16,
+    padding: 12,
     paddingTop: 0,
+  },
+  fab: {
+    position: 'absolute',
+    right: 16,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderCurve: 'continuous',
   },
 });

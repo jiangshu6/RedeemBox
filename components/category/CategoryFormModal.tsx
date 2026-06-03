@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -14,7 +14,7 @@ import { PRESET_COLORS } from '@/constants';
 import { Button } from '@/components/common/Button';
 import { Category, CreateCategoryDTO, UpdateCategoryDTO } from '@/types';
 
-const MODAL_HEIGHT = 420;
+const MODAL_HEIGHT = 400;
 
 /**
  * 类别表单弹窗属性
@@ -34,6 +34,7 @@ interface CategoryFormModalProps {
 
 /**
  * 类别表单弹窗组件
+ * 优化了圆角、间距和颜色选择器样式
  */
 export function CategoryFormModal({
   visible,
@@ -59,7 +60,6 @@ export function CategoryFormModal({
   // 处理显示/隐藏动画
   useEffect(() => {
     if (visible) {
-      // 显示动画：遮罩层淡入 + 内容从底部弹出
       Animated.parallel([
         Animated.timing(backdropOpacity, {
           toValue: 1,
@@ -74,7 +74,6 @@ export function CategoryFormModal({
         }),
       ]).start();
     } else {
-      // 隐藏动画
       Animated.parallel([
         Animated.timing(backdropOpacity, {
           toValue: 0,
@@ -109,10 +108,7 @@ export function CategoryFormModal({
     }
 
     setLoading(true);
-    const data = isEditing
-      ? { name: name.trim(), color: selectedColor }
-      : { name: name.trim(), color: selectedColor };
-    
+    const data = { name: name.trim(), color: selectedColor };
     const success = await onSubmit(data as CreateCategoryDTO | UpdateCategoryDTO);
     setLoading(false);
 
@@ -133,6 +129,12 @@ export function CategoryFormModal({
     }
   };
 
+  const handleBackdropPress = useCallback(() => {
+    if (!loading) {
+      onClose();
+    }
+  }, [loading, onClose]);
+
   return (
     <Modal
       visible={visible}
@@ -143,15 +145,12 @@ export function CategoryFormModal({
     >
       {/* 遮罩层 */}
       <Animated.View
-        style={[
-          styles.overlay,
-          { opacity: backdropOpacity },
-        ]}
+        style={[styles.overlay, { opacity: backdropOpacity }]}
       >
         <TouchableOpacity
           style={styles.backdrop}
           activeOpacity={1}
-          onPress={onClose}
+          onPress={handleBackdropPress}
         />
       </Animated.View>
 
@@ -159,17 +158,20 @@ export function CategoryFormModal({
       <Animated.View
         style={[
           styles.containerWrapper,
-          {
-            transform: [{ translateY }],
-          },
+          { transform: [{ translateY }] },
         ]}
       >
         <View
           style={[
             styles.container,
-            { backgroundColor: colors.background },
+            { backgroundColor: colorScheme === 'dark' ? '#1c1c1e' : '#fff' },
           ]}
         >
+          {/* 顶部指示条 */}
+          <View style={styles.gripper}>
+            <View style={[styles.gripperBar, { backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.15)' }]} />
+          </View>
+
           <Text style={[styles.title, { color: colors.text }]}>
             {isEditing ? '编辑类别' : '新建类别'}
           </Text>
@@ -182,9 +184,9 @@ export function CategoryFormModal({
               style={[
                 styles.input,
                 {
-                  backgroundColor: colorScheme === 'dark' ? '#1a1a1a' : '#f5f5f5',
+                  backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.06)' : '#f5f5f5',
                   color: colors.text,
-                  borderColor: colors.border,
+                  borderColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
                 },
               ]}
               value={name}
@@ -207,10 +209,18 @@ export function CategoryFormModal({
                   style={[
                     styles.colorOption,
                     { backgroundColor: color },
-                    selectedColor === color && styles.colorOptionSelected,
+                    selectedColor === color && [
+                      styles.colorOptionSelected,
+                      { shadowColor: color },
+                    ],
                   ]}
                   onPress={() => setSelectedColor(color)}
-                />
+                  activeOpacity={0.7}
+                >
+                  {selectedColor === color && (
+                    <View style={styles.checkmark} />
+                  )}
+                </TouchableOpacity>
               ))}
             </View>
           </View>
@@ -271,16 +281,25 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
-    paddingBottom: 40,
+    paddingBottom: 36,
+  },
+  gripper: {
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  gripperBar: {
+    width: 36,
+    height: 5,
+    borderRadius: 3,
   },
   title: {
     fontSize: 20,
     fontWeight: '600',
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: 20,
   },
   field: {
-    marginBottom: 20,
+    marginBottom: 16,
   },
   label: {
     fontSize: 14,
@@ -289,10 +308,11 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 48,
-    borderRadius: 8,
+    borderRadius: 12,
     borderWidth: 1,
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     fontSize: 16,
+    borderCurve: 'continuous',
   },
   colorGrid: {
     flexDirection: 'row',
@@ -300,23 +320,28 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   colorOption: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   colorOptionSelected: {
-    borderWidth: 3,
-    borderColor: '#fff',
-    shadowColor: '#000',
+    shadowOpacity: 0.3,
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  checkmark: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#fff',
   },
   buttons: {
     flexDirection: 'row',
     gap: 12,
-    marginTop: 8,
+    marginTop: 4,
   },
   button: {
     flex: 1,

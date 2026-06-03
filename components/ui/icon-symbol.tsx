@@ -9,12 +9,14 @@ export type IconName =
   // Tab 图标
   | 'ticket'
   | 'folder'
+  | 'tag'
   | 'gear'
   // 导航图标
   | 'chevron-left'
   | 'chevron-right'
   | 'chevron-up'
   | 'chevron-down'
+  | 'angle-down'
   // 操作图标
   | 'plus'
   | 'minus'
@@ -43,7 +45,11 @@ export type IconName =
   | 'house'
   | 'paper-plane'
   | 'list'
-  | 'filter';
+  | 'filter'
+  | 'square-and-arrow-up'
+  | 'square-and-arrow-down'
+  | 'angle-right'
+  | 'arrow-triangle-2-circlepath';
 
 /**
  * 图标名称映射
@@ -53,12 +59,14 @@ const iconNameMap: Record<IconName, string> = {
   // Tab 图标
   'ticket': 'ticket',
   'folder': 'folder',
+  'tag': 'tag',
   'gear': 'gear',
   // 导航图标
   'chevron-left': 'chevron-left',
   'chevron-right': 'chevron-right',
   'chevron-up': 'chevron-up',
-  'chevron-down': 'chevron-down',
+  'chevron-down': 'solid:chevron-down',
+  'angle-down': 'angle-down',
   // 操作图标
   'plus': 'plus',
   'minus': 'minus',
@@ -88,6 +96,10 @@ const iconNameMap: Record<IconName, string> = {
   'paper-plane': 'paper-plane',
   'list': 'list',
   'filter': 'filter',
+  'square-and-arrow-up': 'upload',
+  'square-and-arrow-down': 'download',
+  'angle-right': 'chevron-right',
+  'arrow-triangle-2-circlepath': 'rotate',
 };
 
 /**
@@ -106,6 +118,20 @@ export function IconSymbol({
   style?: StyleProp<ViewStyle>;
 }) {
   const faName = iconNameMap[name] || name;
+
+  // 解析 solid: 前缀
+  if (faName.startsWith('solid:')) {
+    return (
+      <FontAwesome6
+        name={faName.slice(6)}
+        size={size}
+        color={color}
+        style={style}
+        solid
+      />
+    );
+  }
+
   return (
     <FontAwesome6
       name={faName}
