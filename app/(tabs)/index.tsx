@@ -28,16 +28,14 @@ export default function HomeScreen() {
   const {
     filteredCodes,
     loading,
-    hasFilter,
     loadCodes,
     search,
     setFilter,
-    clearFilter,
     filter,
   } = useCodes();
 
   const { categories, fetchCategories } = useCategoryStore();
-  const { confirmDialog, toast, hideToast, isLoading, loadingText } = useUIStore();
+  const { confirmDialog, toast, hideToast } = useUIStore();
 
   const [refreshing, setRefreshing] = useState(false);
   const [initialized, setInitialized] = useState(false);
@@ -94,13 +92,12 @@ export default function HomeScreen() {
 
   // 新建兑换码
   const handleAddCode = useCallback(() => {
-    router.push('/code/new');
-  }, []);
-
-  // 清除筛选
-  const handleClearFilter = useCallback(() => {
-    clearFilter();
-  }, [clearFilter]);
+    if (selectedCategoryId !== null) {
+      router.push(`/code/new?categoryId=${selectedCategoryId}`);
+    } else {
+      router.push('/code/new');
+    }
+  }, [selectedCategoryId]);
 
   // 选择类别筛选
   const handleSelectCategory = useCallback((categoryId: number | null) => {
@@ -291,9 +288,9 @@ export default function HomeScreen() {
       {showEmpty ? (
         <EmptyState
           title="暂无兑换码"
-          description={hasFilter ? '没有符合条件的兑换码' : '点击右下角按钮添加第一个兑换码'}
-          actionText={hasFilter ? '清除筛选' : '添加兑换码'}
-          onAction={hasFilter ? handleClearFilter : handleAddCode}
+          description="点击右下角按钮添加第一个兑换码"
+          actionText="添加兑换码"
+          onAction={handleAddCode}
           icon={<IconSymbol name="ticket" size={48} color={colors.icon} />}
         />
       ) : initialized && (

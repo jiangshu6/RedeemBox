@@ -30,7 +30,7 @@ interface FormErrors {
 /**
  * 兑换码表单Hook
  */
-export function useCodeForm(initialCode?: RedemptionCode | null) {
+export function useCodeForm(initialCode?: RedemptionCode | null, initialCategoryId?: number) {
   const [formData, setFormData] = useState<CodeFormData>({
     code: '',
     categoryId: null,
@@ -67,9 +67,10 @@ export function useCodeForm(initialCode?: RedemptionCode | null) {
         isNotifyEnabled: initialCode.isNotifyEnabled,
       });
     } else {
-      // 新建时使用默认通知天数
+      // 新建时，使用传入的初始类别
       setFormData((prev) => ({
         ...prev,
+        categoryId: initialCategoryId ?? null,
         notifyDays: defaultNotifyDays,
       }));
     }

@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 import { useCodeForm } from '@/hooks/useCodeForm';
@@ -20,6 +20,9 @@ export default function NewCodeScreen() {
   const colors = Colors[colorScheme ?? 'light'];
   const insets = useSafeAreaInsets();
   const { toast, hideToast } = useUIStore();
+  const params = useLocalSearchParams<{ categoryId?: string }>();
+  const parsedId = params.categoryId ? parseInt(params.categoryId, 10) : undefined;
+  const initialCategoryId = parsedId && !Number.isNaN(parsedId) ? parsedId : undefined;
 
   const {
     formData,
@@ -28,7 +31,7 @@ export default function NewCodeScreen() {
     categories,
     updateField,
     submit,
-  } = useCodeForm();
+  } = useCodeForm(undefined, initialCategoryId);
 
   const handleSubmit = useCallback(async (): Promise<boolean> => {
     const success = await submit();
