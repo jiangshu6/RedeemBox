@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Switch,
 } from 'react-native';
+import { DatePicker } from '@ant-design/react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 import { Button } from '@/components/common/Button';
@@ -88,6 +89,7 @@ export function CodeForm({
 
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showCustomDatePicker, setShowCustomDatePicker] = useState(false);
 
   const selectedCategory = categories.find((c) => c.id === formData.categoryId);
 
@@ -279,9 +281,43 @@ export function CodeForm({
                 </TouchableOpacity>
               );
             })}
+            {/* 自定义日期按钮 */}
+            <TouchableOpacity
+              style={[
+                styles.dateOption,
+                {
+                  backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+                },
+              ]}
+              onPress={() => {
+                setShowDatePicker(false);
+                setShowCustomDatePicker(true);
+              }}
+            >
+              <Text style={[styles.dateOptionText, { color: colors.text }]}>
+                自定义日期
+              </Text>
+            </TouchableOpacity>
           </View>
         )}
       </View>
+
+      {/* 自定义日期选择器 */}
+      <DatePicker
+        mode="date"
+        value={formData.expireDate || new Date()}
+        minDate={new Date()}
+        onChange={(date) => {
+          updateField('expireDate', date);
+        }}
+        onOk={(date) => {
+          updateField('expireDate', date);
+          setShowCustomDatePicker(false);
+        }}
+        onDismiss={() => setShowCustomDatePicker(false)}
+        visible={showCustomDatePicker}
+        format="YYYY-MM-DD"
+      />
 
       {/* 通知设置 */}
       <View style={styles.field}>
@@ -294,6 +330,8 @@ export function CodeForm({
             onValueChange={(value) => updateField('isNotifyEnabled', value)}
             trackColor={{ false: colors.border, true: ACCENT_COLOR }}
             thumbColor="#fff"
+            // ios_backgroundColor="transparent"
+            // style={{ backgroundColor: 'transparent' }}
           />
         </View>
 

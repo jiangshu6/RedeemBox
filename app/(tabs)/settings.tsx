@@ -96,6 +96,8 @@ export default function SettingsScreen() {
               onValueChange={(value : boolean) => toggleNotifyEnabled()}
               trackColor={{ false: colors.border, true: '#0a7ea4' }}
               thumbColor="#fff"
+              // ios_backgroundColor="transparent"
+              style={{ backgroundColor: 'transparent' }}
             />
           </View>
 
