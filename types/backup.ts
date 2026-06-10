@@ -8,6 +8,7 @@ export interface BackupCategory {
   name: string;
   color: string;
   sortOrder: number;
+  expireDate: number | null;
   createdAt: number;
   updatedAt: number;
 }

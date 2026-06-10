@@ -10,7 +10,7 @@ const DATABASE_NAME = 'redemption_codes.db';
 /**
  * 数据库版本
  */
-const DATABASE_VERSION = 2;
+const DATABASE_VERSION = 3;
 
 /**
  * 数据库实例
@@ -27,6 +27,9 @@ export async function initDatabase(): Promise<SQLite.SQLiteDatabase> {
   db = await SQLite.openDatabaseAsync(DATABASE_NAME);
 
   await runMigrations(db);
+
+  // 强制检查并确保 expire_date 字段存在
+  await ensureExpireDateColumn(db);
 
   return db;
 }
@@ -68,6 +71,9 @@ async function runMigrations(database: SQLite.SQLiteDatabase): Promise<void> {
   }
   if (currentVersion < 2) {
     await runMigrationV2(database);
+  }
+  if (currentVersion < 3) {
+    await runMigrationV3(database);
   }
 
   await database.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
@@ -200,6 +206,70 @@ async function runMigrationV2(database: SQLite.SQLiteDatabase): Promise<void> {
     CREATE INDEX IF NOT EXISTS idx_category_uuid ON category(uuid);
     CREATE INDEX IF NOT EXISTS idx_code_uuid ON redemption_code(uuid);
   `);
+}
+
+/**
+ * V3 迁移：为 category 表添加 expire_date 字段
+ * @param database 数据库实例
+ */
+async function runMigrationV3(database: SQLite.SQLiteDatabase): Promise<void> {
+  try {
+    console.log('Running V3 migration...');
+    // 检查 expire_date 字段是否已存在
+    const tableInfo = await database.getAllAsync<{ name: string }>(
+      'PRAGMA table_info(category)'
+    );
+    console.log('Category table columns:', tableInfo.map(col => col.name));
+    const hasExpireDate = tableInfo.some(col => col.name === 'expire_date');
+
+    // 如果字段不存在，则添加
+    if (!hasExpireDate) {
+      console.log('Adding expire_date column...');
+      await database.execAsync(`
+        ALTER TABLE category ADD COLUMN expire_date INTEGER;
+      `);
+      console.log('expire_date column added successfully');
+    } else {
+      console.log('expire_date column already exists');
+    }
+  } catch (error) {
+    console.error('Migration V3 failed:', error);
+    // 即使迁移失败也不抛出错误，避免影响应用启动
+  }
+}
+
+/**
+ * 确保 expire_date 字段存在（强制检查）
+ * @param database 数据库实例
+ */
+async function ensureExpireDateColumn(database: SQLite.SQLiteDatabase): Promise<void> {
+  try {
+    console.log('Ensuring expire_date column exists...');
+    const tableInfo = await database.getAllAsync<{ name: string }>(
+      'PRAGMA table_info(category)'
+    );
+    console.log('Current category table columns:', tableInfo.map(col => col.name));
+    const hasExpireDate = tableInfo.some(col => col.name === 'expire_date');
+
+    if (!hasExpireDate) {
+      console.log('expire_date column missing, adding it now...');
+      await database.execAsync(`
+        ALTER TABLE category ADD COLUMN expire_date INTEGER;
+      `);
+      console.log('expire_date column added successfully');
+      
+      // 验证字段是否添加成功
+      const tableInfoAfter = await database.getAllAsync<{ name: string }>(
+        'PRAGMA table_info(category)'
+      );
+      console.log('Category table columns after adding:', tableInfoAfter.map(col => col.name));
+    } else {
+      console.log('expire_date column exists, all good!');
+    }
+  } catch (error) {
+    console.error('Failed to ensure expire_date column:', error);
+    throw error;
+  }
 }
 
 /**

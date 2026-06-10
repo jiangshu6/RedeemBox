@@ -76,6 +76,19 @@ export function useCodeForm(initialCode?: RedemptionCode | null, initialCategory
     }
   }, [initialCode, defaultNotifyDays]);
 
+  // 新建时，自动填入类别的默认到期时间
+  useEffect(() => {
+    if (!initialCode && initialCategoryId) {
+      const category = categories.find((c) => c.id === initialCategoryId);
+      if (category) {
+        setFormData((prev) => ({
+          ...prev,
+          expireDate: category.expireDate ? new Date(category.expireDate) : null,
+        }));
+      }
+    }
+  }, [initialCode, initialCategoryId, categories]);
+
   /**
    * 更新表单字段
    */

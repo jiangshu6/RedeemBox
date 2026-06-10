@@ -96,6 +96,35 @@ export function CodeForm({
   // 可选的提醒天数选项
   const notifyDaysOptions = [1, 3, 7, 14, 30];
 
+  // 预设天数选项
+  const presetDays = [7, 30, 90, 180, 365];
+
+  // 判断是否是自定义日期（不是永久有效，也不是预设天数）
+  const isCustomDate = formData.expireDate !== null && (() => {
+    for (const days of presetDays) {
+      const presetDate = new Date();
+      presetDate.setDate(presetDate.getDate() + days);
+      presetDate.setHours(0, 0, 0, 0);
+      const expireDateCopy = new Date(formData.expireDate!);
+      expireDateCopy.setHours(0, 0, 0, 0);
+      if (expireDateCopy.getTime() === presetDate.getTime()) {
+        return false;
+      }
+    }
+    return true;
+  })();
+
+  // 判断某个预设天数是否被选中
+  const isPresetDaysSelected = (days: number): boolean => {
+    if (!formData.expireDate) return false;
+    const presetDate = new Date();
+    presetDate.setDate(presetDate.getDate() + days);
+    presetDate.setHours(0, 0, 0, 0);
+    const expireDateCopy = new Date(formData.expireDate);
+    expireDateCopy.setHours(0, 0, 0, 0);
+    return expireDateCopy.getTime() === presetDate.getTime();
+  };
+
   return (
     <ScrollView
       style={styles.container}
@@ -184,6 +213,8 @@ export function CodeForm({
                 style={styles.categoryOption}
                 onPress={() => {
                   updateField('categoryId', category.id);
+                  // 自动填入类别的默认到期时间，没有则设为永久有效
+                  updateField('expireDate', category.expireDate ? new Date(category.expireDate) : null);
                   setShowCategoryPicker(false);
                 }}
               >
@@ -237,7 +268,7 @@ export function CodeForm({
           <Text style={[styles.pickerText, { color: colors.text }]}>
             {formData.expireDate
             ? formatDate(formData.expireDate.getTime())
-            : '选择到期日期'}
+            : '永久有效'}
           </Text>
           <IconSymbol
             name={showDatePicker ? 'chevron-up' : 'chevron-down'}
@@ -250,24 +281,30 @@ export function CodeForm({
         {showDatePicker && (
           <View style={styles.dateOptions}>
             <TouchableOpacity
-              style={[styles.dateOption, { backgroundColor: ACCENT_COLOR }]}
+              style={[
+                styles.dateOption,
+                {
+                  backgroundColor: formData.expireDate === null ? ACCENT_COLOR : (colorScheme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)'),
+                },
+              ]}
               onPress={() => {
                 updateField('expireDate', null);
                 setShowDatePicker(false);
               }}
             >
-              <Text style={styles.dateOptionText}>永久有效</Text>
+              <Text style={[styles.dateOptionText, { color: formData.expireDate === null ? '#fff' : colors.text }]}>永久有效</Text>
             </TouchableOpacity>
-            {[7, 30, 90, 180, 365].map((days) => {
+            {presetDays.map((days) => {
               const date = new Date();
               date.setDate(date.getDate() + days);
+              const isSelected = isPresetDaysSelected(days);
               return (
                 <TouchableOpacity
                   key={days}
                   style={[
                     styles.dateOption,
                     {
-                      backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+                      backgroundColor: isSelected ? ACCENT_COLOR : (colorScheme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)'),
                     },
                   ]}
                   onPress={() => {
@@ -275,7 +312,7 @@ export function CodeForm({
                     setShowDatePicker(false);
                   }}
                 >
-                  <Text style={[styles.dateOptionText, { color: colors.text }]}>
+                  <Text style={[styles.dateOptionText, { color: isSelected ? '#fff' : colors.text }]}>
                     {days}天后
                   </Text>
                 </TouchableOpacity>
@@ -286,7 +323,7 @@ export function CodeForm({
               style={[
                 styles.dateOption,
                 {
-                  backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+                  backgroundColor: isCustomDate ? ACCENT_COLOR : (colorScheme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)'),
                 },
               ]}
               onPress={() => {
@@ -294,7 +331,7 @@ export function CodeForm({
                 setShowCustomDatePicker(true);
               }}
             >
-              <Text style={[styles.dateOptionText, { color: colors.text }]}>
+              <Text style={[styles.dateOptionText, { color: isCustomDate ? '#fff' : colors.text }]}>
                 自定义日期
               </Text>
             </TouchableOpacity>

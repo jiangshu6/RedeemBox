@@ -26,7 +26,7 @@ const BACKUP_VERSION = 1;
 /**
  * 当前数据库版本
  */
-const CURRENT_DATABASE_VERSION = 2;
+const CURRENT_DATABASE_VERSION = 3;
 
 /**
  * 导出备份
@@ -44,6 +44,7 @@ export async function exportBackup(): Promise<boolean> {
       name: cat.name,
       color: cat.color,
       sortOrder: cat.sortOrder,
+      expireDate: cat.expireDate,
       createdAt: cat.createdAt,
       updatedAt: cat.updatedAt,
     }));
@@ -290,6 +291,7 @@ function validateBackupCategory(data: unknown): data is BackupCategory {
     typeof cat.name === 'string' &&
     typeof cat.color === 'string' &&
     typeof cat.sortOrder === 'number' &&
+    (cat.expireDate === null || typeof cat.expireDate === 'number') &&
     typeof cat.createdAt === 'number' &&
     typeof cat.updatedAt === 'number'
   );

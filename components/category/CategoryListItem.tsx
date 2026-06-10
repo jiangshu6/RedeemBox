@@ -3,6 +3,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 import { CategoryWithCount } from '@/types';
 import { formatCodeCount } from '@/utils/formatters';
+import { formatDate } from '@/utils/date';
 
 /**
  * 类别列表项属性
@@ -44,13 +45,18 @@ export function CategoryListItem({
       <View style={[styles.colorStrip, { backgroundColor: category.color }]} />
 
       <View style={styles.content}>
-        <Text
-          selectable
-          style={[styles.name, { color: colors.text }]}
-          numberOfLines={1}
-        >
-          {category.name}
-        </Text>
+        <View style={styles.textContainer}>
+          <Text
+            selectable
+            style={[styles.name, { color: colors.text }]}
+            numberOfLines={1}
+          >
+            {category.name}
+          </Text>
+          <Text style={[styles.expireDate, { color: colors.icon }]}>
+            到期：{formatDate(category.expireDate)}
+          </Text>
+        </View>
         <View style={styles.badge}>
           <Text style={[styles.badgeText, { color: colors.icon }]}>
             {formatCodeCount(category.codeCount)}
@@ -84,10 +90,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: 12,
   },
+  textContainer: {
+    flex: 1,
+    gap: 4,
+  },
   name: {
     fontSize: 15,
     fontWeight: '600',
-    flex: 1,
+  },
+  expireDate: {
+    fontSize: 13,
   },
   badge: {
     paddingHorizontal: 8,

@@ -12,6 +12,7 @@ function rowToEntity(row: CategoryRow): Category {
     name: row.name,
     color: row.color,
     sortOrder: row.sort_order,
+    expireDate: row.expire_date,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -25,56 +26,82 @@ export const CategoryRepository = {
    * 创建类别
    */
   async create(data: CreateCategoryDTO): Promise<Category | null> {
-    const db = getDatabase();
-    const now = Date.now();
-    const uuid = generateUuid();
+    console.log('CategoryRepository.create called with:', data);
+    try {
+      const db = getDatabase();
+      const now = Date.now();
+      const uuid = generateUuid();
 
-    // 获取当前最大排序值
-    const maxSortResult = await db.getFirstAsync<{ max_sort: number | null }>(
-      'SELECT MAX(sort_order) as max_sort FROM category'
-    );
-    const sortOrder = (maxSortResult?.max_sort ?? -1) + 1;
+      // 获取当前最大排序值
+      const maxSortResult = await db.getFirstAsync<{ max_sort: number | null }>(
+        'SELECT MAX(sort_order) as max_sort FROM category'
+      );
+      const sortOrder = (maxSortResult?.max_sort ?? -1) + 1;
 
-    const result = await db.runAsync(
-      `INSERT INTO category (uuid, name, color, sort_order, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [uuid, data.name, data.color ?? DEFAULT_CATEGORY_COLOR, sortOrder, now, now]
-    );
-    return this.getById(result.lastInsertRowId);
+      console.log('Inserting category:', { uuid, name: data.name, color: data.color ?? DEFAULT_CATEGORY_COLOR, sortOrder, expireDate: data.expireDate ?? null, now });
+
+      const result = await db.runAsync(
+        `INSERT INTO category (uuid, name, color, sort_order, expire_date, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [uuid, data.name, data.color ?? DEFAULT_CATEGORY_COLOR, sortOrder, data.expireDate ?? null, now, now]
+      );
+      console.log('Insert result:', result);
+      const category = await this.getById(result.lastInsertRowId);
+      console.log('Created category:', category);
+      return category;
+    } catch (error) {
+      console.error('CategoryRepository.create error:', error);
+      throw error;
+    }
   },
 
   /**
    * 更新类别
    */
   async update(id: number, data: UpdateCategoryDTO): Promise<Category | null> {
-    const db = getDatabase();
-    const now = Date.now();
-    const updates: string[] = [];
-    const values: (string | number)[] = [];
+    console.log('CategoryRepository.update called with:', { id, data });
+    try {
+      const db = getDatabase();
+      const now = Date.now();
+      const updates: string[] = [];
+      const values: (string | number | null)[] = [];
 
-    if (data.name !== undefined) {
-      updates.push('name = ?');
-      values.push(data.name);
+      if (data.name !== undefined) {
+        updates.push('name = ?');
+        values.push(data.name);
+      }
+      if (data.color !== undefined) {
+        updates.push('color = ?');
+        values.push(data.color);
+      }
+      if (data.expireDate !== undefined) {
+        updates.push('expire_date = ?');
+        values.push(data.expireDate);
+      }
+
+      if (updates.length === 0) {
+        console.log('No updates, returning current category');
+        return this.getById(id);
+      }
+
+      updates.push('updated_at = ?');
+      values.push(now);
+      values.push(id);
+
+      console.log('Updating category:', { updates: updates.join(', '), values });
+
+      await db.runAsync(
+        `UPDATE category SET ${updates.join(', ')} WHERE id = ?`,
+        values
+      );
+
+      const category = await this.getById(id);
+      console.log('Updated category:', category);
+      return category;
+    } catch (error) {
+      console.error('CategoryRepository.update error:', error);
+      throw error;
     }
-    if (data.color !== undefined) {
-      updates.push('color = ?');
-      values.push(data.color);
-    }
-
-    if (updates.length === 0) {
-      return this.getById(id);
-    }
-
-    updates.push('updated_at = ?');
-    values.push(now);
-    values.push(id);
-
-    await db.runAsync(
-      `UPDATE category SET ${updates.join(', ')} WHERE id = ?`,
-      values
-    );
-
-    return this.getById(id);
   },
 
   /**
@@ -216,9 +243,9 @@ export const CategoryRepository = {
     }
 
     const result = await db.runAsync(
-      `INSERT INTO category (uuid, name, color, sort_order, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [data.uuid, data.name, data.color, data.sortOrder, data.createdAt, data.updatedAt]
+      `INSERT INTO category (uuid, name, color, sort_order, expire_date, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [data.uuid, data.name, data.color, data.sortOrder, data.expireDate, data.createdAt, data.updatedAt]
     );
     return this.getById(result.lastInsertRowId);
   },

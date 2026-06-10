@@ -82,11 +82,12 @@ export function Toast({
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    bottom: 100,
+    top: 60,
     left: 0,
     right: 0,
     alignItems: 'center',
-    zIndex: 1000,
+    zIndex: 9999,
+    elevation: 9999,
   },
   toast: {
     paddingHorizontal: 20,

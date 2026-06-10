@@ -43,6 +43,7 @@ export const CategoryService = {
       const category = await CategoryRepository.create({
         name: data.name.trim(),
         color: data.color,
+        expireDate: data.expireDate,
       });
       if (!category) {
         return { success: false, error: '创建类别失败' };
@@ -83,6 +84,7 @@ export const CategoryService = {
       const category = await CategoryRepository.update(id, {
         name: data.name?.trim(),
         color: data.color,
+        expireDate: data.expireDate,
       });
       if (!category) {
         return { success: false, error: '类别不存在' };

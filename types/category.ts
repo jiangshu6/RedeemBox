@@ -7,6 +7,7 @@ export interface Category {
   name: string;
   color: string;
   sortOrder: number;
+  expireDate: number | null;
   createdAt: number;
   updatedAt: number;
 }
@@ -24,6 +25,7 @@ export interface CategoryWithCount extends Category {
 export interface CreateCategoryDTO {
   name: string;
   color?: string;
+  expireDate?: number | null;
 }
 
 /**
@@ -32,6 +34,7 @@ export interface CreateCategoryDTO {
 export interface UpdateCategoryDTO {
   name?: string;
   color?: string;
+  expireDate?: number | null;
 }
 
 /**
@@ -43,6 +46,7 @@ export interface CategoryRow {
   name: string;
   color: string;
   sort_order: number;
+  expire_date: number | null;
   created_at: number;
   updated_at: number;
 }
