@@ -152,7 +152,7 @@ export function CodeForm({
             </View>
           ) : (
             <Text style={[styles.pickerPlaceholder, { color: colors.icon }]}>
-              选择类别（可选）
+              选择类别
             </Text>
           )}
           <IconSymbol name="chevron-right" size={16} color={colors.icon} />
@@ -212,7 +212,7 @@ export function CodeForm({
           ]}
           value={formData.description}
           onChangeText={(text) => updateField('description', text)}
-          placeholder="添加备注（可选）"
+          placeholder="添加备注"
           placeholderTextColor={colors.icon}
           maxLength={500}
         />
@@ -236,8 +236,8 @@ export function CodeForm({
         >
           <Text style={[styles.pickerText, { color: colors.text }]}>
             {formData.expireDate
-              ? formatDate(formData.expireDate.getTime())
-              : '选择到期日期（可选）'}
+            ? formatDate(formData.expireDate.getTime())
+            : '选择到期日期'}
           </Text>
           <IconSymbol
             name={showDatePicker ? 'chevron-up' : 'chevron-down'}
