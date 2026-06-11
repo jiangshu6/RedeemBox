@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { View, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Stack } from 'expo-router';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -8,8 +8,7 @@ import { useCategories } from '@/hooks/useCategories';
 import { useCategoryStore } from '@/store/category.store';
 import { useUIStore } from '@/store/ui.store';
 import { CategoryListItem, CategoryFormModal } from '@/components/category';
-import { EmptyState, ConfirmDialog, Toast } from '@/components/common';
-import { ThemedText } from '@/components/themed-text';
+import { EmptyState, ConfirmDialog, Toast, Toolbar } from '@/components/common';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { CategoryWithCount, CreateCategoryDTO, UpdateCategoryDTO } from '@/types';
@@ -111,10 +110,7 @@ export default function CategoryScreen() {
       <Stack.Screen options={{ headerShown: false }} />
 
       {/* 自定义工具栏 */}
-      <View style={[styles.toolbar, { paddingTop: insets.top + 4 }]}>
-        <ThemedText type="title" style={styles.toolbarTitle}>类别管理</ThemedText>
-        <View style={[styles.divider, { backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }]} />
-      </View>
+      <Toolbar title="类别管理" />
 
       {/* 类别列表 */}
       {categories.length === 0 && !loading ? (
@@ -198,18 +194,6 @@ export default function CategoryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  toolbar: {
-    paddingHorizontal: 16,
-    paddingBottom: 8,
-  },
-  toolbarTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-  },
-  divider: {
-    height: StyleSheet.hairlineWidth,
-    marginTop: 8,
   },
   listContent: {
     padding: 12,

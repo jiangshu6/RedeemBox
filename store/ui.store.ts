@@ -89,7 +89,7 @@ export const useUIStore = create<UIState>((set, get) => ({
     // 3秒后自动隐藏
     setTimeout(() => {
       get().hideToast();
-    }, 3000);
+    }, 2000);
   },
 
   // 隐藏Toast

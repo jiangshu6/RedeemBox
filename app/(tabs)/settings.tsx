@@ -7,8 +7,7 @@ import { Colors } from '@/constants/theme';
 import { useSettings } from '@/hooks/useSettings';
 import { useBackup } from '@/hooks/useBackup';
 import { NotifyDaysSetting, NotifyTimeSetting, ThemeModeSetting } from '@/components/settings';
-import { ConfirmDialog, Toast, Loading } from '@/components/common';
-import { ThemedText } from '@/components/themed-text';
+import { ConfirmDialog, Toast, Loading, Toolbar } from '@/components/common';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useUIStore } from '@/store/ui.store';
@@ -63,10 +62,7 @@ export default function SettingsScreen() {
       <Stack.Screen options={{ headerShown: false }} />
 
       {/* 自定义工具栏 */}
-      <View style={[styles.toolbar, { paddingTop: insets.top + 4 }]}>
-        <ThemedText type="title" style={styles.toolbarTitle}>设置</ThemedText>
-        <View style={[styles.divider, { backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }]} />
-      </View>
+      <Toolbar title="设置" />
 
       <ScrollView
         style={styles.content}
@@ -79,7 +75,7 @@ export default function SettingsScreen() {
         {/* 通知设置 */}
         <View style={[styles.section, { backgroundColor: sectionBgColor }]}>
           {/* 通知开关 */}
-          <View style={[styles.settingRow, { borderBottomColor: dividerColor }]}>
+          <View style={[styles.settingRow, { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: dividerColor }]}>
             <View style={styles.settingLeft}>
               <IconSymbol name="bell" size={22} color={colors.icon} />
               <View style={styles.textGroup}>
@@ -93,7 +89,7 @@ export default function SettingsScreen() {
             </View>
             <Switch
               value={notifyEnabled}
-              onValueChange={(value : boolean) => toggleNotifyEnabled()}
+              onValueChange={(value : boolean) => {toggleNotifyEnabled()}}
               trackColor={{ false: colors.border, true: '#0a7ea4' }}
               thumbColor="#fff"
               // ios_backgroundColor="transparent"
@@ -102,7 +98,7 @@ export default function SettingsScreen() {
           </View>
 
           {/* 通知天数设置 */}
-          <View style={[styles.settingRow, { borderBottomColor: dividerColor }]}>
+          <View style={[styles.settingRow, { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: dividerColor }]}>
             <NotifyDaysSetting
               value={defaultNotifyDays}
               onChange={updateDefaultNotifyDays}
@@ -133,7 +129,7 @@ export default function SettingsScreen() {
         {/* 数据管理 */}
         <View style={[styles.section, { backgroundColor: sectionBgColor }]}>
           <TouchableOpacity
-            style={[styles.actionRow, { borderBottomColor: dividerColor }]}
+            style={[styles.actionRow, { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: dividerColor }]}
             onPress={handleExport}
             activeOpacity={0.7}
           >
@@ -147,7 +143,7 @@ export default function SettingsScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.actionRow, { borderBottomColor: dividerColor }]}
+            style={[styles.actionRow, { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: dividerColor }]}
             onPress={handleImport}
             activeOpacity={0.7}
           >
@@ -177,7 +173,7 @@ export default function SettingsScreen() {
 
         {/* 关于 */}
         <View style={[styles.section, { backgroundColor: sectionBgColor }]}>
-          <View style={[styles.actionRow, { borderBottomColor: dividerColor }]}>
+          <View style={[styles.actionRow, { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: dividerColor }]}>
             <View style={styles.settingLeft}>
               <IconSymbol name="circle-info" size={22} color={colors.icon} />
               <Text style={[styles.settingLabel, { color: colors.text }]}>
@@ -237,18 +233,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  toolbar: {
-    paddingHorizontal: 16,
-    paddingBottom: 8,
-  },
-  toolbarTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-  },
-  divider: {
-    height: StyleSheet.hairlineWidth,
-    marginTop: 8,
-  },
   content: {
     flex: 1,
   },
@@ -274,14 +258,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 16,
-    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   actionRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 16,
-    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   settingLeft: {
     flexDirection: 'row',

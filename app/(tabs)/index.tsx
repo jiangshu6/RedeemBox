@@ -8,7 +8,7 @@ import { useCodes } from '@/hooks/useCodes';
 import { useCategoryStore } from '@/store/category.store';
 import { useUIStore } from '@/store/ui.store';
 import { CodeListItem, CodeSearchBar } from '@/components/code';
-import { EmptyState, ConfirmDialog, Toast, Loading } from '@/components/common';
+import { EmptyState, ConfirmDialog, Toast, Loading, Toolbar } from '@/components/common';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -144,9 +144,9 @@ export default function HomeScreen() {
       <Stack.Screen options={{ headerShown: false }} />
 
       {/* 自定义工具栏 */}
-      <View style={[styles.toolbar, { paddingTop: insets.top + 4 }]}>
-        <View style={styles.toolbarRow}>
-          <ThemedText type="title" style={styles.toolbarTitle}>兑换码</ThemedText>
+      <Toolbar
+        title="兑换码"
+        rightButton={
           <TouchableOpacity
             style={styles.toolbarButton}
             onPress={toggleSearch}
@@ -154,13 +154,12 @@ export default function HomeScreen() {
           >
             <IconSymbol
               name={searchExpanded ? 'chevron-down' : 'magnifying-glass'}
-              size={22}
+              size={18}
               color={colors.icon}
             />
           </TouchableOpacity>
-        </View>
-        <View style={[styles.divider, { backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }]} />
-      </View>
+        }
+      />
 
       {/* 搜索栏 - 展开时显示 */}
       <CodeSearchBar
@@ -395,29 +394,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  toolbar: {
-    paddingHorizontal: 16,
-    paddingBottom: 8,
-  },
-  toolbarRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  toolbarTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-  },
   toolbarButton: {
-    padding: 8,
-    minHeight: 44,
-    minWidth: 44,
+    padding: 4,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  divider: {
-    height: StyleSheet.hairlineWidth,
-    marginTop: 8,
   },
   filterSection: {
     marginBottom: 8,

@@ -341,7 +341,6 @@ export function CodeForm({
 
       {/* 自定义日期选择器 */}
       <DatePicker
-        mode="date"
         value={formData.expireDate || new Date()}
         minDate={new Date()}
         onChange={(date) => {
@@ -351,7 +350,6 @@ export function CodeForm({
           updateField('expireDate', date);
           setShowCustomDatePicker(false);
         }}
-        onDismiss={() => setShowCustomDatePicker(false)}
         visible={showCustomDatePicker}
         format="YYYY-MM-DD"
       />

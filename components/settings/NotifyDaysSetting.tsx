@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, TextInput } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 import { Button } from '@/components/common/Button';
+import { useUIStore } from '@/store/ui.store';
+
 
 /**
  * 通知天数设置属性

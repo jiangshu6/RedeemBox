@@ -43,7 +43,12 @@ export function CodeListItem({
         styles.container,
         {
           backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.04)' : '#fff',
-          borderColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+          borderColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.12)',
+          shadowColor: colorScheme === 'dark' ? 'transparent' : 'rgba(0,0,0,0.08)',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 1,
+          shadowRadius: 2,
+          elevation: colorScheme === 'dark' ? 0 : 2,
         },
       ]}
       onPress={() => onPress(code)}
