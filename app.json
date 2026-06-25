@@ -7,7 +7,6 @@
     "icon": "./assets/icons/icon.png",
     "scheme": "redeembox",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "platforms": [
       "android",
       "web"
@@ -21,10 +20,7 @@
         "monochromeImage": ""
       },
       "package": "com.jiangshu.redeembox",
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
-      "enableProguardInReleaseBuilds": true,
-      "enableShrinkResourcesInReleaseBuilds": true
+      "predictiveBackGestureEnabled": false
     },
     "web": {
       "output": "static",
