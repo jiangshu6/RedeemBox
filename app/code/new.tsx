@@ -6,11 +6,10 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 import { useCodeForm } from '@/hooks/useCodeForm';
 import { CodeForm } from '@/components/code';
-import { Button, Toast } from '@/components/common';
+import { Button } from '@/components/common';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { useUIStore } from '@/store/ui.store';
 
 /**
  * 新建兑换码页面
@@ -19,7 +18,6 @@ export default function NewCodeScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
   const insets = useSafeAreaInsets();
-  const { toast, hideToast } = useUIStore();
   const params = useLocalSearchParams<{ categoryId?: string }>();
   const parsedId = params.categoryId ? parseInt(params.categoryId, 10) : undefined;
   const initialCategoryId = parsedId && !Number.isNaN(parsedId) ? parsedId : undefined;
@@ -95,14 +93,6 @@ export default function NewCodeScreen() {
           style={styles.button}
         />
       </View>
-
-      {/* Toast提示 */}
-      <Toast
-        visible={toast.visible}
-        message={toast.message}
-        type={toast.type}
-        onHide={hideToast}
-      />
     </ThemedView>
   );
 }

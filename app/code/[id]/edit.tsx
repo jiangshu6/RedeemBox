@@ -6,7 +6,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 import { useCodeForm } from '@/hooks/useCodeForm';
 import { CodeForm } from '@/components/code';
-import { Button, Toast } from '@/components/common';
+import { Button } from '@/components/common';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -22,7 +22,7 @@ export default function EditCodeScreen() {
   const colors = Colors[colorScheme ?? 'light'];
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { toast, hideToast, showLoading, hideLoading } = useUIStore();
+  const { showLoading, hideLoading } = useUIStore();
 
   const [code, setCode] = useState<RedemptionCode | null>(null);
   const [loading, setLoading] = useState(true);
@@ -135,19 +135,11 @@ export default function EditCodeScreen() {
           size="small"
           disabled={!formData.code.trim()}
           style={styles.button}
-        />
-      </View>
-
-      {/* Toast提示 */}
-      <Toast
-        visible={toast.visible}
-        message={toast.message}
-        type={toast.type}
-        onHide={hideToast}
-      />
-    </ThemedView>
-  );
-}
+          />
+        </View>
+      </ThemedView>
+    );
+  }
 
 /**
  * 样式

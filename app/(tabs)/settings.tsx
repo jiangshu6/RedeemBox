@@ -7,7 +7,7 @@ import { Colors } from '@/constants/theme';
 import { useSettings } from '@/hooks/useSettings';
 import { useBackup } from '@/hooks/useBackup';
 import { NotifyDaysSetting, NotifyTimeSetting, ThemeModeSetting } from '@/components/settings';
-import { ConfirmDialog, Toast, Loading, Toolbar } from '@/components/common';
+import { ConfirmDialog, Loading, Toolbar } from '@/components/common';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useUIStore } from '@/store/ui.store';
@@ -41,7 +41,7 @@ export default function SettingsScreen() {
 
   const { handleExport, handleImport } = useBackup();
 
-  const { confirmDialog, toast, hideToast, isLoading, loadingText } = useUIStore();
+  const { confirmDialog, isLoading, loadingText } = useUIStore();
 
   // 初始化加载设置
   useEffect(() => {
@@ -210,14 +210,6 @@ export default function SettingsScreen() {
         danger={true}
         onConfirm={confirmDialog.onConfirm}
         onCancel={confirmDialog.onCancel ?? (() => {})}
-      />
-
-      {/* Toast提示 */}
-      <Toast
-        visible={toast.visible}
-        message={toast.message}
-        type={toast.type}
-        onHide={hideToast}
       />
 
       {/* Loading */}

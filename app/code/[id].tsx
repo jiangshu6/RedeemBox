@@ -7,7 +7,7 @@ import { Colors } from '@/constants/theme';
 import { useCode } from '@/hooks/useCode';
 import { useUIStore } from '@/store/ui.store';
 import { CodeStatusBadge } from '@/components/code';
-import { Button, ConfirmDialog, Toast } from '@/components/common';
+import { Button, ConfirmDialog } from '@/components/common';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -34,7 +34,7 @@ export default function CodeDetailScreen() {
     deleteCode,
   } = useCode(codeId);
 
-  const { confirmDialog, toast, hideToast } = useUIStore();
+  const { confirmDialog } = useUIStore();
 
   // 处理编辑
   const handleEdit = useCallback(() => {
@@ -205,14 +205,6 @@ export default function CodeDetailScreen() {
         danger={true}
         onConfirm={confirmDialog.onConfirm}
         onCancel={confirmDialog.onCancel ?? (() => {})}
-      />
-
-      {/* Toast提示 */}
-      <Toast
-        visible={toast.visible}
-        message={toast.message}
-        type={toast.type}
-        onHide={hideToast}
       />
     </ThemedView>
   );

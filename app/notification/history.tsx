@@ -7,7 +7,7 @@ import { Colors } from '@/constants/theme';
 import { useNotificationStore } from '@/store/notification.store';
 import { useUIStore } from '@/store/ui.store';
 import { NotificationItem } from '@/components/notification';
-import { ConfirmDialog, EmptyState, Toast } from '@/components/common';
+import { ConfirmDialog, EmptyState } from '@/components/common';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -22,7 +22,7 @@ export default function NotificationHistoryScreen() {
   const insets = useSafeAreaInsets();
 
   const { records, fetchHistory } = useNotificationStore();
-  const { confirmDialog, toast, hideToast } = useUIStore();
+  const { confirmDialog } = useUIStore();
 
   // 加载通知历史
   useEffect(() => {
@@ -108,14 +108,6 @@ export default function NotificationHistoryScreen() {
         danger={true}
         onConfirm={confirmDialog.onConfirm}
         onCancel={confirmDialog.onCancel ?? (() => {})}
-      />
-
-      {/* Toast提示 */}
-      <Toast
-        visible={toast.visible}
-        message={toast.message}
-        type={toast.type}
-        onHide={hideToast}
       />
     </ThemedView>
   );

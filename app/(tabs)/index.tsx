@@ -8,7 +8,7 @@ import { useCodes } from '@/hooks/useCodes';
 import { useCategoryStore } from '@/store/category.store';
 import { useUIStore } from '@/store/ui.store';
 import { CodeListItem, CodeSearchBar } from '@/components/code';
-import { EmptyState, ConfirmDialog, Toast, Loading, Toolbar } from '@/components/common';
+import { EmptyState, ConfirmDialog, Loading, Toolbar } from '@/components/common';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -35,7 +35,7 @@ export default function HomeScreen() {
   } = useCodes();
 
   const { categories, fetchCategories } = useCategoryStore();
-  const { confirmDialog, toast, hideToast } = useUIStore();
+  const { confirmDialog } = useUIStore();
 
   const [refreshing, setRefreshing] = useState(false);
   const [initialized, setInitialized] = useState(false);
@@ -374,14 +374,6 @@ export default function HomeScreen() {
         danger={true}
         onConfirm={confirmDialog.onConfirm}
         onCancel={confirmDialog.onCancel ?? (() => {})}
-      />
-
-      {/* Toast提示 */}
-      <Toast
-        visible={toast.visible}
-        message={toast.message}
-        type={toast.type}
-        onHide={hideToast}
       />
     </ThemedView>
   );

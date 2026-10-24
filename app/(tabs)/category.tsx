@@ -8,7 +8,7 @@ import { useCategories } from '@/hooks/useCategories';
 import { useCategoryStore } from '@/store/category.store';
 import { useUIStore } from '@/store/ui.store';
 import { CategoryListItem, CategoryFormModal } from '@/components/category';
-import { EmptyState, ConfirmDialog, Toast, Toolbar } from '@/components/common';
+import { EmptyState, ConfirmDialog, Toolbar } from '@/components/common';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { CategoryWithCount, CreateCategoryDTO, UpdateCategoryDTO } from '@/types';
@@ -33,7 +33,7 @@ export default function CategoryScreen() {
   // 直接从 store 获取 deleteCategory 方法（接受 ID 参数）
   const deleteCategoryFromStore = useCategoryStore((state) => state.deleteCategory);
 
-  const { confirmDialog, toast, hideToast } = useUIStore();
+  const { confirmDialog } = useUIStore();
 
   const [formVisible, setFormVisible] = useState(false);
   const [editingCategory, setEditingCategory] = useState<CategoryWithCount | null>(null);
@@ -175,14 +175,6 @@ export default function CategoryScreen() {
         danger={true}
         onConfirm={confirmDialog.onConfirm}
         onCancel={confirmDialog.onCancel ?? (() => {})}
-      />
-
-      {/* Toast提示 */}
-      <Toast
-        visible={toast.visible}
-        message={toast.message}
-        type={toast.type}
-        onHide={hideToast}
       />
     </ThemedView>
   );

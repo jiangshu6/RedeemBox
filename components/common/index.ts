@@ -5,5 +5,4 @@ export * from './Button';
 export * from './ConfirmDialog';
 export * from './Loading';
 export * from './EmptyState';
-export * from './Toast';
 export * from './Toolbar';

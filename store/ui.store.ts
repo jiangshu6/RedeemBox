@@ -1,9 +1,15 @@
 import { create } from 'zustand';
+import { Toast } from '@ant-design/react-native';
 
 /**
  * Toast类型
  */
 type ToastType = 'success' | 'error' | 'info';
+
+/**
+ * Toast 样式（文字固定白色）
+ */
+const toastStyles = { content: { color: '#fff' } };
 
 /**
  * 确认对话框配置
@@ -20,29 +26,18 @@ interface ConfirmDialogConfig {
 }
 
 /**
- * Toast配置
- */
-interface ToastConfig {
-  visible: boolean;
-  message: string;
-  type: ToastType;
-}
-
-/**
  * UI状态接口
  */
 interface UIState {
   // 状态
   isLoading: boolean;
   loadingText: string | null;
-  toast: ToastConfig;
   confirmDialog: ConfirmDialogConfig;
 
   // 操作
   showLoading: (text?: string) => void;
   hideLoading: () => void;
   showToast: (message: string, type?: ToastType) => void;
-  hideToast: () => void;
   showConfirm: (config: Omit<ConfirmDialogConfig, 'visible'>) => void;
   hideConfirm: () => void;
 }
@@ -50,15 +45,10 @@ interface UIState {
 /**
  * UI状态管理
  */
-export const useUIStore = create<UIState>((set, get) => ({
+export const useUIStore = create<UIState>((set) => ({
   // 初始状态
   isLoading: false,
   loadingText: null,
-  toast: {
-    visible: false,
-    message: '',
-    type: 'info',
-  },
   confirmDialog: {
     visible: false,
     title: '',
@@ -76,30 +66,20 @@ export const useUIStore = create<UIState>((set, get) => ({
     set({ isLoading: false, loadingText: null });
   },
 
-  // 显示Toast
+  // 显示Toast（使用 Ant Design Toast）
   showToast: (message: string, type: ToastType = 'info') => {
-    set({
-      toast: {
-        visible: true,
-        message,
-        type,
-      },
-    });
-
-    // 3秒后自动隐藏
-    setTimeout(() => {
-      get().hideToast();
-    }, 2000);
-  },
-
-  // 隐藏Toast
-  hideToast: () => {
-    set((state) => ({
-      toast: {
-        ...state.toast,
-        visible: false,
-      },
-    }));
+    switch (type) {
+      case 'success':
+        Toast.show({ content: message, icon: 'success', styles: toastStyles });
+        break;
+      case 'error':
+        Toast.show({ content: message, icon: 'fail', styles: toastStyles });
+        break;
+      case 'info':
+      default:
+        Toast.show({ content: message, styles: toastStyles });
+        break;
+    }
   },
 
   // 显示确认对话框

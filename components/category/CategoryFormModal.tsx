@@ -13,23 +13,10 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 import { PRESET_COLORS } from '@/constants';
 import { Button } from '@/components/common/Button';
+import { useUIStore } from '@/store/ui.store';
 import { Category, CreateCategoryDTO, UpdateCategoryDTO } from '@/types';
 
 const MODAL_HEIGHT = 500;
-
-/**
- * Toast类型
- */
-type ToastType = 'success' | 'error' | 'info';
-
-/**
- * 内部Toast配置
- */
-interface InternalToast {
-  visible: boolean;
-  message: string;
-  type: ToastType;
-}
 
 /**
  * 类别表单弹窗属性
@@ -60,6 +47,7 @@ export function CategoryFormModal({
 }: CategoryFormModalProps) {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+  const showToast = useUIStore((state) => state.showToast);
 
   const [name, setName] = useState('');
   const [selectedColor, setSelectedColor] = useState<string>(PRESET_COLORS[0]);
@@ -68,25 +56,12 @@ export function CategoryFormModal({
   const [day, setDay] = useState('');
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [internalToast, setInternalToast] = useState<InternalToast>({
-    visible: false,
-    message: '',
-    type: 'info',
-  });
 
   // 动画值
   const translateY = useRef(new Animated.Value(MODAL_HEIGHT)).current;
   const backdropOpacity = useRef(new Animated.Value(0)).current;
 
   const isEditing = !!category;
-
-  // 显示内部Toast
-  const showInternalToast = useCallback((message: string, type: ToastType = 'error') => {
-    setInternalToast({ visible: true, message, type });
-    setTimeout(() => {
-      setInternalToast(prev => ({ ...prev, visible: false }));
-    }, 3000);
-  }, []);
 
   // 处理显示/隐藏动画
   useEffect(() => {
@@ -152,7 +127,7 @@ export function CategoryFormModal({
     
     if (!name.trim()) {
       console.log('name is empty');
-      showInternalToast('请输入类别名称');
+      showToast('请输入类别名称', 'error');
       return;
     }
 
@@ -162,7 +137,7 @@ export function CategoryFormModal({
       // 如果有任何一个字段有值，则所有字段都必须有值
       if (!year.trim() || !month.trim() || !day.trim()) {
         console.log('date fields incomplete');
-        showInternalToast('请填写完整的到期时间');
+        showToast('请填写完整的到期时间', 'error');
         return;
       }
 
@@ -172,7 +147,7 @@ export function CategoryFormModal({
 
       if (isNaN(y) || isNaN(m) || isNaN(d)) {
         console.log('date is NaN');
-        showInternalToast('日期格式不正确');
+        showToast('日期格式不正确', 'error');
         return;
       }
 
@@ -180,7 +155,7 @@ export function CategoryFormModal({
       const date = new Date(y, m - 1, d);
       if (date.getFullYear() !== y || date.getMonth() !== m - 1 || date.getDate() !== d) {
         console.log('date is invalid');
-        showInternalToast('日期不合法');
+        showToast('日期不合法', 'error');
         return;
       }
 
@@ -198,7 +173,7 @@ export function CategoryFormModal({
     if (success) {
       onClose();
     } else {
-      showInternalToast(isEditing ? '更新失败，请重试' : '创建失败，请重试');
+      showToast(isEditing ? '更新失败，请重试' : '创建失败，请重试', 'error');
     }
   };
 
@@ -228,23 +203,6 @@ export function CategoryFormModal({
       onRequestClose={onClose}
       statusBarTranslucent
     >
-      {/* 内部Toast */}
-      {internalToast.visible && (
-        <View style={styles.internalToastContainer}>
-          <View
-            style={[
-              styles.internalToast,
-              {
-                backgroundColor: internalToast.type === 'error' ? '#FF3B30' :
-                                 internalToast.type === 'success' ? '#34C759' : '#007AFF',
-              },
-            ]}
-          >
-            <Text style={styles.internalToastText}>{internalToast.message}</Text>
-          </View>
-        </View>
-      )}
-
       {/* 遮罩层 */}
       <Animated.View
         style={[styles.overlay, { opacity: backdropOpacity }]}
@@ -525,31 +483,5 @@ const styles = StyleSheet.create({
   },
   button: {
     flex: 1,
-  },
-  internalToastContainer: {
-    position: 'absolute',
-    bottom: 100,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-    zIndex: 9999,
-    elevation: 9999,
-  },
-  internalToast: {
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    borderRadius: 14,
-    maxWidth: '80%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  internalToastText: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: '600',
-    textAlign: 'center',
   },
 });

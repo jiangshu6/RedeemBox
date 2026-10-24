@@ -11,6 +11,7 @@ import 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useNotification } from '@/hooks/useNotification';
 import { useSettingsStore } from '@/store/settings.store';
+import { useUIStore } from '@/store/ui.store';
 import { initDatabase } from '@/services/database.service';
 
 // 忽略 expo-notifications 在 Expo Go 中的远程推送警告
@@ -63,9 +64,9 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [dbReady, setDbReady] = useState(false);
   const [dbError, setDbError] = useState<string | null>(null);
-  
+
   const loadSettings = useSettingsStore((state) => state.loadSettings);
-  
+
   useNotification(dbReady);
 
   // 初始化数据库和字体
